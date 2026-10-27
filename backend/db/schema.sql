@@ -29,3 +29,17 @@ CREATE TABLE IF NOT EXISTS atividade (
   INDEX idx_atividade_data (data_hora),
   INDEX idx_atividade_filtros (tipo, nivel, publico_alvo)
 );
+
+-- UC "Inscrever-se em atividade" — solicitações de participação (StatusParticipacaoEnum)
+CREATE TABLE IF NOT EXISTS participacao (
+  id             INT AUTO_INCREMENT PRIMARY KEY,
+  atividade_id   INT NOT NULL,
+  usuario_id     INT NOT NULL,
+  status         ENUM('PENDENTE','ACEITO','REJEITADO') NOT NULL DEFAULT 'PENDENTE',
+  solicitada_em  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  respondida_em  DATETIME NULL,
+  CONSTRAINT fk_participacao_atividade FOREIGN KEY (atividade_id) REFERENCES atividade(id),
+  CONSTRAINT fk_participacao_usuario   FOREIGN KEY (usuario_id)   REFERENCES usuario(id),
+  INDEX idx_participacao_atividade (atividade_id, status),
+  INDEX idx_participacao_usuario (usuario_id, atividade_id)
+);

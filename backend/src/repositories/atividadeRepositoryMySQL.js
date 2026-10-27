@@ -1,4 +1,22 @@
 /** Repositório MySQL (mysql2/promise). Recebe um pool criado em server.js. */
+function paraAtividade(l) {
+  return {
+    id: l.id,
+    titulo: l.titulo,
+    descricao: l.descricao,
+    tipo: l.tipo,
+    nivel: l.nivel,
+    publicoAlvo: l.publico_alvo,
+    dataHora: l.data_hora,
+    local: l.local,
+    numeroIntegrantes: l.numero_integrantes,
+    visibilidade: l.visibilidade,
+    status: l.status,
+    organizadorId: l.organizador_id,
+    criadaEm: l.criada_em,
+  };
+}
+
 function criarAtividadeRepositoryMySQL(pool) {
   return {
     async salvar(a) {
@@ -15,23 +33,18 @@ function criarAtividadeRepositoryMySQL(pool) {
 
     async buscarPorId(id) {
       const [linhas] = await pool.execute('SELECT * FROM atividade WHERE id = ?', [id]);
-      if (linhas.length === 0) return null;
-      const l = linhas[0];
-      return {
-        id: l.id,
-        titulo: l.titulo,
-        descricao: l.descricao,
-        tipo: l.tipo,
-        nivel: l.nivel,
-        publicoAlvo: l.publico_alvo,
-        dataHora: l.data_hora,
-        local: l.local,
-        numeroIntegrantes: l.numero_integrantes,
-        visibilidade: l.visibilidade,
-        status: l.status,
-        organizadorId: l.organizador_id,
-        criadaEm: l.criada_em,
-      };
+      return linhas.length === 0 ? null : paraAtividade(linhas[0]);
+    },
+
+    /** Públicas, agendadas e futuras. Os filtros (Strategy) são aplicados no serviço. */
+    async listarAbertas(agora) {
+      const [linhas] = await pool.execute(
+        `SELECT * FROM atividade
+          WHERE visibilidade = 'PUBLICA' AND status = 'AGENDADA' AND data_hora > ?
+          ORDER BY data_hora`,
+        [agora],
+      );
+      return linhas.map(paraAtividade);
     },
   };
 }

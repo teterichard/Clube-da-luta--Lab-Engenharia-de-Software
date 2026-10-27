@@ -16,4 +16,11 @@ const Nivel = Object.freeze({
   AVANCADO: 'avancado',
 });
 
-module.exports = { StatusAtividade, Visibilidade, Nivel };
+/** Diagrama de classes (5.4) — StatusParticipacaoEnum. */
+const StatusParticipacao = Object.freeze({
+  PENDENTE: 'PENDENTE',
+  ACEITO: 'ACEITO',
+  REJEITADO: 'REJEITADO',
+});
+
+module.exports = { StatusAtividade, Visibilidade, Nivel, StatusParticipacao };
