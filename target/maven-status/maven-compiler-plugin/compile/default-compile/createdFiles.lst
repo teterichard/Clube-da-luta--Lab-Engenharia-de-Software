@@ -1,0 +1,7 @@
+br/mackenzie/topaai/dominio/Usuario.class
+br/mackenzie/topaai/dominio/Participacao.class
+br/mackenzie/topaai/dominio/StatusVisibilidadeEnum.class
+br/mackenzie/topaai/dominio/Atividade.class
+br/mackenzie/topaai/dominio/StatusParticipacaoEnum.class
+br/mackenzie/topaai/dominio/StatusAtividadeEnum.class
+br/mackenzie/topaai/dominio/Comunidade.class
