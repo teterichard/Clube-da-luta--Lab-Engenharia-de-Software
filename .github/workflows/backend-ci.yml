@@ -1,0 +1,33 @@
+name: Esteira CI - Back-end Node
+
+on:
+  push:
+    branches: [ "main", "feature/**" ]
+    paths: [ "backend/**", ".github/workflows/backend-ci.yml" ]
+  pull_request:
+    branches: [ "main" ]
+    paths: [ "backend/**", ".github/workflows/backend-ci.yml" ]
+  workflow_dispatch:
+
+jobs:
+  testes-backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Rodar os testes (Jest)
+        run: npm test
