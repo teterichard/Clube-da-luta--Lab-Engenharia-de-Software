@@ -1,0 +1,62 @@
+.search-bar-container {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;         
+  padding: 4px 4px 4px 14px;    
+  max-width: 380px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.search-bar-container:focus-within {
+  border-color: #6366f1;       /* Azul/roxo de destaque dos seus botões */
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.search-icon {
+  width: 18px;
+  height: 18px;
+  color: #9ca3af;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.search-bar-container:focus-within .search-icon {
+  color: #6366f1;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  color: #1f2937;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+}
+
+.search-btn {
+  background-color: #6366f1;   
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;         
+  font-size: 0.80rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+
+.search-btn:hover {
+  background-color: #4f46e5;
+}
+
+.search-btn:active {
+  transform: scale(0.97);
+}
