@@ -1,7 +1,7 @@
 import React from 'react';
 import './style.css';
 
-function Carousel({ title, children }) {
+function Carousel({ children }) {
   return (
     <section className="carousel-section">
 
