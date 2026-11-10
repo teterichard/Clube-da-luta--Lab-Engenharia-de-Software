@@ -1,0 +1,27 @@
+.aviso {
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  text-align: start;
+  margin: 10px 0;
+}
+
+.aviso ul {
+  margin: 6px 0 0 0;
+  padding-left: 18px;
+}
+
+.aviso_erro {
+  background: #fdecec;
+  color: #b42318;
+}
+
+.aviso_sucesso {
+  background: #e7f6ec;
+  color: #1e7b3c;
+}
+
+.aviso_info {
+  background: rgba(99, 102, 241, 0.1);
+  color: #4338ca;
+}
