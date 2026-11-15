@@ -4,13 +4,25 @@ Casos de uso implementados:
 
 - **5.2 — Criar Atividade** — plano: [`docs/plano-acao-criar-atividade.md`](../docs/plano-acao-criar-atividade.md)
 - **Inscrever-se em atividade** (caso de uso principal) — plano: [`docs/plano-acao-inscricao-atividade.md`](../docs/plano-acao-inscricao-atividade.md)
+- **Autenticação** (RF01/RF02) — cadastro, login com senha em bcrypt (RNF04) e perfil
 
 ## Endpoints
 
-Todos exigem `Authorization: Bearer <jwt>`.
+### Autenticação (públicas)
 
 | Método | Rota | O que faz |
 |---|---|---|
+| `POST` | `/api/auth/cadastro` | Cria a conta `{ nome, email, senha, localizacao?, idade?, proficiencia? }` e devolve `{ token, usuario }` |
+| `POST` | `/api/auth/login` | `{ email, senha }` → `{ token, usuario }` |
+
+### Demais rotas
+
+Todas exigem `Authorization: Bearer <jwt>` (o token vem do cadastro ou do login).
+
+| Método | Rota | O que faz |
+|---|---|---|
+| `GET` | `/api/usuarios/me` | Perfil do usuário logado |
+| `PATCH` | `/api/usuarios/me` | Edita `nome`, `localizacao`, `idade`, `proficiencia` |
 | `POST` | `/api/atividades` | Cria atividade (organizador = usuário do token) |
 | `GET` | `/api/atividades` | Lista atividades públicas e agendadas, com `vagas`. Filtros: `tipo`, `nivel`, `publicoAlvo`, `local` (parcial), `data` (AAAA-MM-DD), `comVaga=true` |
 | `GET` | `/api/atividades/:id` | Detalhes da atividade + vagas restantes |
@@ -43,11 +55,15 @@ npm test
 
 ## Exemplo de chamada
 
-Enquanto o UC de login não existe, gere um token de teste:
-
 ```bash
-TOKEN=$(node -e "console.log(require('jsonwebtoken').sign({sub:1,nome:'Org'}, 'troque-este-segredo'))")
+# cadastro (devolve o token) e login
+curl -s http://localhost:3000/api/auth/cadastro -H "Content-Type: application/json" \
+  -d '{"nome":"Organizador","email":"org@exemplo.com","senha":"senha1234"}'
 
+TOKEN=$(curl -s http://localhost:3000/api/auth/login -H "Content-Type: application/json" \
+  -d '{"email":"org@exemplo.com","senha":"senha1234"}' | node -pe 'JSON.parse(require("fs").readFileSync(0)).token')
+
+# criar atividade
 curl -i http://localhost:3000/api/atividades \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
@@ -56,18 +72,16 @@ curl -i http://localhost:3000/api/atividades \
     "tipo": "basquete",
     "nivel": "iniciante",
     "publicoAlvo": "adultos",
-    "dataHora": "2026-11-20T18:00:00-03:00",
+    "dataHora": "2026-12-20T18:00:00-03:00",
     "local": "Parque Ibirapuera - quadra 3",
     "numeroIntegrantes": 10,
     "visibilidade": "PUBLICA"
   }'
 ```
 
-Fluxo de inscrição (use um token com outro `sub` para o participante):
+Fluxo de inscrição (cadastre um segundo usuário para ser o participante e guarde o token em `TOKEN_JOAO`):
 
 ```bash
-TOKEN_JOAO=$(node -e "console.log(require('jsonwebtoken').sign({sub:2,nome:'Joao'}, 'troque-este-segredo'))")
-
 # listar com filtros
 curl "http://localhost:3000/api/atividades?tipo=basquete&nivel=iniciante&comVaga=true" -H "Authorization: Bearer $TOKEN_JOAO"
 
@@ -80,4 +94,5 @@ curl -X PATCH http://localhost:3000/api/participacoes/1 \
   -d '{"decisao":"ACEITAR"}'
 ```
 
-> Com MySQL, o `sub` do token precisa existir na tabela `usuario` (chave estrangeira).
+> `scripts/gerarToken.js` continua disponível para gerar tokens de teste rapidamente, mas com MySQL o `sub`
+> precisa existir na tabela `usuario`; prefira o cadastro.
