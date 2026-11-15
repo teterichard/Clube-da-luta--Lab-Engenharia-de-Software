@@ -6,6 +6,7 @@ function paraNotificacao(l) {
     tipo: l.tipo,
     mensagem: l.mensagem,
     atividadeId: l.atividade_id,
+    comunidadeId: l.comunidade_id,
     lida: Boolean(l.lida),
     criadaEm: l.criada_em,
   };
@@ -18,9 +19,9 @@ function criarNotificacaoRepositoryMySQL(pool) {
       for (const n of lista) {
         // eslint-disable-next-line no-await-in-loop
         const [resultado] = await pool.execute(
-          `INSERT INTO notificacao (usuario_id, tipo, mensagem, atividade_id, lida, criada_em)
-           VALUES (?, ?, ?, ?, ?, ?)`,
-          [n.usuarioId, n.tipo, n.mensagem, n.atividadeId ?? null, n.lida ? 1 : 0, n.criadaEm],
+          `INSERT INTO notificacao (usuario_id, tipo, mensagem, atividade_id, comunidade_id, lida, criada_em)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [n.usuarioId, n.tipo, n.mensagem, n.atividadeId ?? null, n.comunidadeId ?? null, n.lida ? 1 : 0, n.criadaEm],
         );
         salvas.push({ id: resultado.insertId, ...n });
       }

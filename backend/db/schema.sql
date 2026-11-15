@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS notificacao (
   tipo          VARCHAR(40)  NOT NULL,
   mensagem      VARCHAR(255) NOT NULL,
   atividade_id  INT NULL,
+  comunidade_id INT NULL, -- sem FK: a tabela comunidade é criada mais abaixo
   lida          TINYINT(1)   NOT NULL DEFAULT 0,
   criada_em     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_notificacao_usuario   FOREIGN KEY (usuario_id)   REFERENCES usuario(id),

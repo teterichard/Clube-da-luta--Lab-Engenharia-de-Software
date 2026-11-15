@@ -140,6 +140,24 @@ describeMySQL('Integração com MySQL', () => {
     expect((await request(app).get('/api/notificacoes').set(org.auth)).body.naoLidas).toBe(0);
   });
 
+  test('comunidade privada: pedido, aprovação, notificação e saída', async () => {
+    const { body: c } = await request(app).post('/api/comunidades').set(org.auth)
+      .send({ nome: 'Corredores do Ibirapuera', descricao: 'Treinos às terças', visibilidade: 'PRIVADA' });
+    expect(c).toMatchObject({ meuPapel: 'ADMIN', totalMembros: 1 });
+
+    await request(app).post(`/api/comunidades/${c.id}/membros`).set(ana.auth);
+    const aviso = (await request(app).get('/api/notificacoes').set(org.auth)).body.itens.find((n) => n.comunidadeId === c.id);
+    expect(aviso.tipo).toBe('PEDIDO_COMUNIDADE');
+
+    await request(app).patch(`/api/comunidades/${c.id}/membros/${ana.id}`).set(org.auth).send({ decisao: 'ACEITAR' });
+    const busca = await request(app).get('/api/comunidades?busca=ibirapuera').set(ana.auth);
+    expect(busca.body.find((x) => x.id === c.id)).toMatchObject({ meuStatus: 'ATIVO', totalMembros: 2 });
+
+    const membros = await request(app).get(`/api/comunidades/${c.id}/membros`).set(ana.auth);
+    expect(membros.body.map((m) => m.usuario.nome)).toEqual(['Organizador', 'Ana']);
+    expect((await request(app).delete(`/api/comunidades/${c.id}/membros/me`).set(ana.auth)).body.totalMembros).toBe(1);
+  });
+
   test('ciclo de status e exclusão em cascata', async () => {
     const { body: a } = await request(app).post('/api/atividades').set(org.auth).send(atividade());
     expect((await request(app).post(`/api/atividades/${a.id}/iniciar`).set(org.auth)).body.status).toBe('ATIVA');

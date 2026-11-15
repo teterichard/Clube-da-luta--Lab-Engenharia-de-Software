@@ -81,7 +81,8 @@ function criarComunidadeRepositoryMySQL(pool) {
 
     async listarMembros(comunidadeId) {
       const [linhas] = await pool.execute(
-        'SELECT * FROM comunidade_membro WHERE comunidade_id = ? ORDER BY entrou_em',
+        `SELECT * FROM comunidade_membro WHERE comunidade_id = ?
+          ORDER BY papel = 'ADMIN' DESC, entrou_em, usuario_id`,
         [comunidadeId],
       );
       return linhas.map(paraMembro);

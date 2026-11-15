@@ -41,8 +41,14 @@ function criarComunidadeRepositoryMemoria() {
     async removerMembro(comunidadeId, usuarioId) {
       membros = membros.filter((m) => !(igual(m.comunidadeId, comunidadeId) && igual(m.usuarioId, usuarioId)));
     },
+    /** Administradores primeiro, depois por ordem de entrada. */
     async listarMembros(comunidadeId) {
-      return membros.filter((m) => igual(m.comunidadeId, comunidadeId)).map((m) => ({ ...m }));
+      return membros
+        .filter((m) => igual(m.comunidadeId, comunidadeId))
+        .sort((a, b) => (b.papel === 'ADMIN') - (a.papel === 'ADMIN')
+          || new Date(a.entrouEm) - new Date(b.entrouEm)
+          || a.usuarioId - b.usuarioId)
+        .map((m) => ({ ...m }));
     },
     async listarVinculosDoUsuario(usuarioId) {
       return membros.filter((m) => igual(m.usuarioId, usuarioId)).map((m) => ({ ...m }));
