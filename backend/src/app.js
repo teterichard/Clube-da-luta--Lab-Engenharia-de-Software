@@ -19,6 +19,10 @@ const { criarConviteController } = require('./controllers/conviteController');
 const { conviteRoutes } = require('./routes/conviteRoutes');
 const { criarTravaMemoria } = require('./repositories/travaMemoria');
 const { criarPublicador } = require('./domain/eventos');
+const { criarNotificacaoRepositoryMemoria } = require('./repositories/notificacaoRepositoryMemoria');
+const { criarNotificacaoService } = require('./services/notificacaoService');
+const { criarNotificacaoController } = require('./controllers/notificacaoController');
+const { notificacaoRoutes } = require('./routes/notificacaoRoutes');
 
 /**
  * Monta a aplicação Express sem subir o servidor (facilita testes com Supertest).
@@ -29,6 +33,7 @@ function criarApp({
   participacaoRepository = criarParticipacaoRepositoryMemoria(),
   usuarioRepository = criarUsuarioRepositoryMemoria(),
   conviteRepository = criarConviteRepositoryMemoria(),
+  notificacaoRepository = criarNotificacaoRepositoryMemoria(),
   comTrava,
   eventos = criarPublicador(),
   jwtSegredo,
@@ -43,6 +48,7 @@ function criarApp({
   const deps = {
     ...repositorios,
     usuarioRepository,
+    notificacaoRepository,
     comTrava: comTrava || criarTravaMemoria(repositorios),
     eventos,
     relogio,
@@ -53,6 +59,9 @@ function criarApp({
   const autenticacaoController = criarAutenticacaoController(criarAutenticacaoService({
     ...deps, jwtSegredo, jwtExpiracao, custoBcrypt,
   }));
+  const notificacaoService = criarNotificacaoService(deps);
+  notificacaoService.registrarObservadores();
+  const notificacaoController = criarNotificacaoController(notificacaoService);
   const autenticar = autenticacao(jwtSegredo);
 
   app.get('/health', (_req, res) => res.json({ status: 'ok' }));
@@ -62,6 +71,7 @@ function criarApp({
     controller, participacaoController, conviteController, autenticar,
   }));
   app.use('/api/convites', conviteRoutes({ conviteController, autenticar }));
+  app.use('/api/notificacoes', notificacaoRoutes({ notificacaoController, autenticar }));
   app.use('/api/participacoes', participacaoRoutes({ participacaoController, autenticar }));
 
   app.use(tratadorErros);
