@@ -3,6 +3,7 @@ require('dotenv').config({ quiet: true });
 module.exports = {
   porta: Number(process.env.PORT) || 3000,
   jwtSegredo: process.env.JWT_SECRET || 'troque-este-segredo',
+  jwtExpiracao: process.env.JWT_EXPIRES_IN || '7d',
   usarMemoria: process.env.DB_IN_MEMORY === 'true',
   db: {
     host: process.env.DB_HOST || 'localhost',
