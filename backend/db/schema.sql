@@ -60,3 +60,17 @@ CREATE TABLE IF NOT EXISTS convite (
   INDEX idx_convite_atividade (atividade_id),
   INDEX idx_convite_convidado (convidado_id, status)
 );
+
+-- Notificações dentro da plataforma (geradas pelos eventos de domínio — padrão Observer)
+CREATE TABLE IF NOT EXISTS notificacao (
+  id            INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id    INT NOT NULL,
+  tipo          VARCHAR(40)  NOT NULL,
+  mensagem      VARCHAR(255) NOT NULL,
+  atividade_id  INT NULL,
+  lida          TINYINT(1)   NOT NULL DEFAULT 0,
+  criada_em     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_notificacao_usuario   FOREIGN KEY (usuario_id)   REFERENCES usuario(id),
+  CONSTRAINT fk_notificacao_atividade FOREIGN KEY (atividade_id) REFERENCES atividade(id) ON DELETE SET NULL,
+  INDEX idx_notificacao_usuario (usuario_id, lida, criada_em)
+);
