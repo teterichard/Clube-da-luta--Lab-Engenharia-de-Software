@@ -4,6 +4,7 @@ Casos de uso implementados:
 
 - **5.2 — Criar Atividade** — plano: [`docs/plano-acao-criar-atividade.md`](../docs/plano-acao-criar-atividade.md)
 - **Inscrever-se em atividade** (caso de uso principal) — plano: [`docs/plano-acao-inscricao-atividade.md`](../docs/plano-acao-inscricao-atividade.md)
+- **Convidar pessoas** (RF07, passo 4 do UC 5.2) — atividades privadas só por convite
 - **Gestão da atividade** (RF04/RF11) — editar, excluir, iniciar, cancelar e concluir
 - **Autenticação** (RF01/RF02) — cadastro, login com senha em bcrypt (RNF04) e perfil
 
@@ -34,6 +35,10 @@ Todas exigem `Authorization: Bearer <jwt>` (o token vem do cadastro ou do login)
 | `POST` | `/api/atividades/:id/concluir` | `ATIVA` → `CONCLUIDA` |
 | `POST` | `/api/atividades/:id/participacoes` | Solicita participação (status `PENDENTE`) |
 | `GET` | `/api/atividades/:id/participacoes` | Organizador vê as solicitações da atividade |
+| `POST` | `/api/atividades/:id/convites` | Organizador convida pelo e-mail: `{ "email": "ana@exemplo.com" }` |
+| `GET` | `/api/atividades/:id/convites` | Organizador vê os convites e respostas |
+| `GET` | `/api/convites` | Convites recebidos pelo usuário logado (`?status=PENDENTE`) |
+| `PATCH` | `/api/convites/:id` | Convidado responde `{ "decisao": "ACEITAR" }` ou `RECUSAR`; aceitar confirma a presença |
 | `PATCH` | `/api/participacoes/:id` | Organizador responde: `{ "decisao": "ACEITAR" }` ou `{ "decisao": "RECUSAR" }` |
 
 Erros: `400` dados inválidos · `401` sem login · `403` sem permissão · `404` não encontrado · `409` regra de negócio (sem vagas, duplicidade, já respondida).
