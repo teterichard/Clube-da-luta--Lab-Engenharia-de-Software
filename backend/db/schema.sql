@@ -1,4 +1,5 @@
--- Topa-aí — schema inicial para o UC 5.2 (Criar Atividade)
+-- Topa-aí — schema do banco MySQL.
+-- Mudou o schema? Recrie o banco local: docker compose down && docker compose up -d
 CREATE TABLE IF NOT EXISTS usuario (
   id            INT AUTO_INCREMENT PRIMARY KEY,
   nome          VARCHAR(100) NOT NULL,
@@ -24,6 +25,7 @@ CREATE TABLE IF NOT EXISTS atividade (
   status              ENUM('AGENDADA','ATIVA','CANCELADA','CONCLUIDA') NOT NULL DEFAULT 'AGENDADA',
   organizador_id      INT          NOT NULL,
   criada_em           DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  atualizada_em       DATETIME     NULL,
   CONSTRAINT fk_atividade_organizador FOREIGN KEY (organizador_id) REFERENCES usuario(id),
   CONSTRAINT ck_atividade_integrantes CHECK (numero_integrantes >= 2),
   INDEX idx_atividade_data (data_hora),
@@ -38,7 +40,7 @@ CREATE TABLE IF NOT EXISTS participacao (
   status         ENUM('PENDENTE','ACEITO','REJEITADO') NOT NULL DEFAULT 'PENDENTE',
   solicitada_em  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   respondida_em  DATETIME NULL,
-  CONSTRAINT fk_participacao_atividade FOREIGN KEY (atividade_id) REFERENCES atividade(id),
+  CONSTRAINT fk_participacao_atividade FOREIGN KEY (atividade_id) REFERENCES atividade(id) ON DELETE CASCADE,
   CONSTRAINT fk_participacao_usuario   FOREIGN KEY (usuario_id)   REFERENCES usuario(id),
   INDEX idx_participacao_atividade (atividade_id, status),
   INDEX idx_participacao_usuario (usuario_id, atividade_id)
