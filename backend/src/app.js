@@ -13,6 +13,10 @@ const { autenticacaoRoutes, usuarioRoutes } = require('./routes/autenticacaoRout
 const { criarAtividadeRepositoryMemoria } = require('./repositories/atividadeRepositoryMemoria');
 const { criarParticipacaoRepositoryMemoria } = require('./repositories/participacaoRepositoryMemoria');
 const { criarUsuarioRepositoryMemoria } = require('./repositories/usuarioRepositoryMemoria');
+const { criarConviteRepositoryMemoria } = require('./repositories/conviteRepositoryMemoria');
+const { criarConviteService } = require('./services/conviteService');
+const { criarConviteController } = require('./controllers/conviteController');
+const { conviteRoutes } = require('./routes/conviteRoutes');
 
 /**
  * Monta a aplicação Express sem subir o servidor (facilita testes com Supertest).
@@ -22,6 +26,7 @@ function criarApp({
   atividadeRepository = criarAtividadeRepositoryMemoria(),
   participacaoRepository = criarParticipacaoRepositoryMemoria(),
   usuarioRepository = criarUsuarioRepositoryMemoria(),
+  conviteRepository = criarConviteRepositoryMemoria(),
   jwtSegredo,
   jwtExpiracao,
   custoBcrypt,
@@ -30,9 +35,12 @@ function criarApp({
   const app = express();
   app.use(express.json());
 
-  const deps = { atividadeRepository, participacaoRepository, usuarioRepository, relogio };
+  const deps = {
+    atividadeRepository, participacaoRepository, usuarioRepository, conviteRepository, relogio,
+  };
   const controller = criarAtividadeController(criarAtividadeService(deps));
   const participacaoController = criarParticipacaoController(criarParticipacaoService(deps));
+  const conviteController = criarConviteController(criarConviteService(deps));
   const autenticacaoController = criarAutenticacaoController(criarAutenticacaoService({
     ...deps, jwtSegredo, jwtExpiracao, custoBcrypt,
   }));
@@ -41,7 +49,10 @@ function criarApp({
   app.get('/health', (_req, res) => res.json({ status: 'ok' }));
   app.use('/api/auth', autenticacaoRoutes({ autenticacaoController }));
   app.use('/api/usuarios', usuarioRoutes({ autenticacaoController, autenticar }));
-  app.use('/api/atividades', atividadeRoutes({ controller, participacaoController, autenticar }));
+  app.use('/api/atividades', atividadeRoutes({
+    controller, participacaoController, conviteController, autenticar,
+  }));
+  app.use('/api/convites', conviteRoutes({ conviteController, autenticar }));
   app.use('/api/participacoes', participacaoRoutes({ participacaoController, autenticar }));
 
   app.use(tratadorErros);

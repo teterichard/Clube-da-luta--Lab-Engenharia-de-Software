@@ -6,11 +6,17 @@ const {
 } = require('../domain/atividade');
 const { lerFiltros, aplicarFiltros } = require('../domain/filtros');
 const { calcularVagas, ehOrganizador } = require('../domain/participacao');
+const { podeVerPorConvite } = require('../domain/convite');
 const { Visibilidade, StatusParticipacao } = require('../domain/enums');
 const { ErroNaoAutenticado, ErroNaoEncontrado } = require('../domain/erros');
 
 /** Casos de uso de Atividade. Recebe os repositórios por injeção de dependência. */
-function criarAtividadeService({ atividadeRepository, participacaoRepository, relogio = () => new Date() }) {
+function criarAtividadeService({
+  atividadeRepository,
+  participacaoRepository,
+  conviteRepository,
+  relogio = () => new Date(),
+}) {
   async function carregar(id) {
     const atividade = await atividadeRepository.buscarPorId(id);
     if (!atividade) throw new ErroNaoEncontrado('Atividade não encontrada');
@@ -51,10 +57,11 @@ function criarAtividadeService({ atividadeRepository, participacaoRepository, re
     /** Inscrever-se em atividade — passo 5: ver detalhes e vagas. */
     async detalhar(id, usuario) {
       const atividade = await atividadeRepository.buscarPorId(id);
-      // atividade privada não aparece para quem não é o organizador
-      if (!atividade
-        || (atividade.visibilidade === Visibilidade.PRIVADA && !ehOrganizador(atividade, usuario))) {
-        throw new ErroNaoEncontrado('Atividade não encontrada');
+      if (!atividade) throw new ErroNaoEncontrado('Atividade não encontrada');
+      // atividade privada só aparece para o organizador e para quem foi convidado (RI04)
+      if (atividade.visibilidade === Visibilidade.PRIVADA && !ehOrganizador(atividade, usuario)) {
+        const convites = conviteRepository ? await conviteRepository.listarPorAtividade(atividade.id) : [];
+        if (!podeVerPorConvite(convites, usuario)) throw new ErroNaoEncontrado('Atividade não encontrada');
       }
       return comVagas(atividade);
     },
@@ -78,6 +85,7 @@ function criarAtividadeService({ atividadeRepository, participacaoRepository, re
       const atual = await carregar(id);
       verificarExclusao(atual, usuario, await contarAceitos(atual.id));
       await participacaoRepository.removerPorAtividade(atual.id);
+      if (conviteRepository) await conviteRepository.removerPorAtividade(atual.id);
       await atividadeRepository.remover(atual.id);
     },
   };

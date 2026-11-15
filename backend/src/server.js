@@ -6,6 +6,8 @@ const { criarParticipacaoRepositoryMemoria } = require('./repositories/participa
 const { criarParticipacaoRepositoryMySQL } = require('./repositories/participacaoRepositoryMySQL');
 const { criarUsuarioRepositoryMemoria } = require('./repositories/usuarioRepositoryMemoria');
 const { criarUsuarioRepositoryMySQL } = require('./repositories/usuarioRepositoryMySQL');
+const { criarConviteRepositoryMemoria } = require('./repositories/conviteRepositoryMemoria');
+const { criarConviteRepositoryMySQL } = require('./repositories/conviteRepositoryMySQL');
 
 function criarRepositorios() {
   if (env.usarMemoria) {
@@ -14,6 +16,7 @@ function criarRepositorios() {
       atividadeRepository: criarAtividadeRepositoryMemoria(),
       participacaoRepository: criarParticipacaoRepositoryMemoria(),
       usuarioRepository: criarUsuarioRepositoryMemoria(),
+      conviteRepository: criarConviteRepositoryMemoria(),
     };
   }
   const mysql = require('mysql2/promise');
@@ -22,6 +25,7 @@ function criarRepositorios() {
     atividadeRepository: criarAtividadeRepositoryMySQL(pool),
     participacaoRepository: criarParticipacaoRepositoryMySQL(pool),
     usuarioRepository: criarUsuarioRepositoryMySQL(pool),
+    conviteRepository: criarConviteRepositoryMySQL(pool),
   };
 }
 
