@@ -1,0 +1,58 @@
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.filtros select,
+.filtros input[type='date'],
+.filtro-local {
+  font: inherit;
+  font-size: 12px;
+  padding: 8px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1f2937;
+  outline: none;
+}
+
+.filtros select:focus,
+.filtros input:focus {
+  border-color: #6366f1;
+}
+
+.filtro-local {
+  flex: 1;
+  min-width: 150px;
+}
+
+.filtro-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #374151;
+  cursor: pointer;
+}
+
+.filtro-check input {
+  accent-color: #6366f1;
+}
+
+.resultado-qtd {
+  font-size: 12px;
+  color: #4b5563;
+  margin-bottom: 4px;
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.grade .card-componente {
+  max-width: none;
+}
