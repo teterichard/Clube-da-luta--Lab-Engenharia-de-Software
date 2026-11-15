@@ -1,0 +1,22 @@
+# Dependências
+node_modules/
+
+# Build e artefatos gerados
+target/
+dist/
+coverage/
+
+# Variáveis de ambiente (use os arquivos .env.example como modelo)
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operacional / editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
