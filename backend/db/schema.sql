@@ -74,3 +74,27 @@ CREATE TABLE IF NOT EXISTS notificacao (
   CONSTRAINT fk_notificacao_atividade FOREIGN KEY (atividade_id) REFERENCES atividade(id) ON DELETE SET NULL,
   INDEX idx_notificacao_usuario (usuario_id, lida, criada_em)
 );
+
+-- Comunidades de interesse (classe Comunidade) e seus membros
+CREATE TABLE IF NOT EXISTS comunidade (
+  id            INT AUTO_INCREMENT PRIMARY KEY,
+  nome          VARCHAR(80)  NOT NULL,
+  descricao     VARCHAR(500) NOT NULL,
+  visibilidade  ENUM('PUBLICA','PRIVADA') NOT NULL DEFAULT 'PUBLICA',
+  criador_id    INT NOT NULL,
+  criada_em     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_comunidade_criador FOREIGN KEY (criador_id) REFERENCES usuario(id),
+  INDEX idx_comunidade_nome (nome)
+);
+
+CREATE TABLE IF NOT EXISTS comunidade_membro (
+  comunidade_id  INT NOT NULL,
+  usuario_id     INT NOT NULL,
+  papel          ENUM('ADMIN','MEMBRO') NOT NULL DEFAULT 'MEMBRO',
+  status         ENUM('ATIVO','PENDENTE') NOT NULL DEFAULT 'ATIVO',
+  entrou_em      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (comunidade_id, usuario_id),
+  CONSTRAINT fk_membro_comunidade FOREIGN KEY (comunidade_id) REFERENCES comunidade(id) ON DELETE CASCADE,
+  CONSTRAINT fk_membro_usuario    FOREIGN KEY (usuario_id)    REFERENCES usuario(id),
+  INDEX idx_membro_usuario (usuario_id)
+);
