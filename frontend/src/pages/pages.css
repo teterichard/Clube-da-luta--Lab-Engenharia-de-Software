@@ -8,6 +8,7 @@
 }
 
 .pagina-titulo {
+  letter-spacing: normal;
   margin: 0 0 4px 0;
   font-size: 20px;
   color: var(--text-h);
@@ -17,6 +18,24 @@
   font-size: 13px;
   margin: 0 0 14px 0;
   color: #4b5563;
+}
+
+.pagina_estreita {
+  max-width: 560px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.form-rodape {
+  font-size: 13px;
+  text-align: center;
+  color: #4b5563;
+}
+
+.form-rodape a {
+  color: #4f46e5;
+  font-weight: 600;
 }
 
 .voltar {

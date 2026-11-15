@@ -4,11 +4,13 @@ import './style.css'
 
 import SearchBar from '../SearchBar'
 import SideMenu from '../SideMenu'
+import { useAuth } from '../../contexts/AuthContext'
 
 // Cabeçalho usado em todas as telas: menu, nome do app, perfil e barra de busca
 function Header({ mostrarBusca = true }) {
   const [menuAberto, setMenuAberto] = useState(false)
   const navigate = useNavigate()
+  const { usuario } = useAuth()
 
   // A busca da barra leva para a tela de Busca filtrando pelo local digitado
   function buscar(termo) {
@@ -29,7 +31,8 @@ function Header({ mostrarBusca = true }) {
 
         <Link to="/" className="firstName">Topa-aí</Link>
 
-        <Link to="/perfil" className="icon-btn" aria-label="Perfil">
+        <Link to={usuario ? '/perfil' : '/entrar'} className="icon-btn"
+          aria-label={usuario ? `Perfil de ${usuario.nome}` : 'Entrar'}>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -38,7 +41,7 @@ function Header({ mostrarBusca = true }) {
         </Link>
       </div>
 
-      {mostrarBusca && (
+      {mostrarBusca && usuario && (
         <div className="searchBox">
           <SearchBar onSearch={buscar} />
         </div>

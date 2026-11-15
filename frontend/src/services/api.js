@@ -1,25 +1,40 @@
 // Comunicação com o back-end (API REST - ver backend/README.md)
-// O token JWT fica salvo no localStorage enquanto o UC de login não existe.
+// O token JWT do login fica no localStorage; a sessão em si é controlada pelo AuthContext.
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api'
 const CHAVE_TOKEN = 'topaai_token'
 
+// Avisado quando a API responde 401 numa rota protegida (token expirado ou inválido)
+export const EVENTO_SESSAO_EXPIRADA = 'topaai:sessao-expirada'
+
+// localStorage pode falhar (modo privado, bloqueio do navegador): nesse caso a sessão vale só até recarregar
+let tokenEmMemoria = null
+
 export function getToken() {
-  return localStorage.getItem(CHAVE_TOKEN)
+  try {
+    return localStorage.getItem(CHAVE_TOKEN) || tokenEmMemoria
+  } catch {
+    return tokenEmMemoria
+  }
 }
 
 export function setToken(token) {
-  if (token) localStorage.setItem(CHAVE_TOKEN, token.trim())
-  else localStorage.removeItem(CHAVE_TOKEN)
+  tokenEmMemoria = token || null
+  try {
+    if (token) localStorage.setItem(CHAVE_TOKEN, token)
+    else localStorage.removeItem(CHAVE_TOKEN)
+  } catch {
+    // segue só com a cópia em memória
+  }
 }
 
 // Lê o "sub" (id do usuário) e o nome de dentro do token, sem validar a assinatura.
-// Serve só para a tela saber quem está logado (ex.: se é o organizador).
-export function getUsuarioLogado() {
-  const token = getToken()
+// Serve só para a tela saber quem está logado (ex.: se é o organizador) antes do /me responder.
+export function lerToken(token = getToken()) {
   if (!token) return null
   try {
     const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')))
+    if (payload.exp && payload.exp * 1000 < Date.now()) return null
     return { id: payload.sub, nome: payload.nome }
   } catch {
     return null
@@ -35,7 +50,7 @@ export class ErroApi extends Error {
   }
 }
 
-async function requisicao(caminho, { method = 'GET', body } = {}) {
+async function requisicao(caminho, { method = 'GET', body, publica = false } = {}) {
   const headers = { 'Content-Type': 'application/json' }
   const token = getToken()
   if (token) headers.Authorization = `Bearer ${token}`
@@ -51,12 +66,36 @@ async function requisicao(caminho, { method = 'GET', body } = {}) {
     throw new ErroApi('Não foi possível conectar ao servidor. O back-end está rodando?', 0)
   }
 
+  if (resposta.status === 204) return null
+
   const dados = await resposta.json().catch(() => null)
+  if (resposta.status === 401 && !publica) {
+    setToken(null)
+    window.dispatchEvent(new Event(EVENTO_SESSAO_EXPIRADA))
+  }
   if (!resposta.ok) {
     const mensagem = (dados && dados.erro) || 'Algo deu errado'
     throw new ErroApi(mensagem, resposta.status, (dados && dados.detalhes) || [])
   }
   return dados
+}
+
+// ---- Autenticação (RF01/RF02) e perfil ----
+
+export function cadastrar(dados) {
+  return requisicao('/auth/cadastro', { method: 'POST', body: dados, publica: true })
+}
+
+export function login(email, senha) {
+  return requisicao('/auth/login', { method: 'POST', body: { email, senha }, publica: true })
+}
+
+export function buscarPerfil() {
+  return requisicao('/usuarios/me')
+}
+
+export function atualizarPerfil(dados) {
+  return requisicao('/usuarios/me', { method: 'PATCH', body: dados })
 }
 
 // ---- Atividades (UC Criar Atividade) ----

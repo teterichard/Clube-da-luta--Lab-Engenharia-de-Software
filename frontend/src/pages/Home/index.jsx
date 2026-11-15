@@ -19,7 +19,7 @@ function Home() {
     listarAtividades({ comVaga: true })
       .then((lista) => setSugestoes(lista))
       .catch(() => {
-        // sem back-end (ou sem token): mostra os exemplos para a tela não ficar vazia
+        // sem back-end: mostra os exemplos para a tela não ficar vazia
         setSugestoes(SUGESTOES)
         setUsandoExemplos(true)
       })
@@ -54,7 +54,7 @@ function Home() {
       <section className="subcontentBox">
         <h3 className="contentTitle">Sugestão de novos eventos </h3>
         {usandoExemplos && (
-          <Aviso tipo="info">Back-end offline ou sem login: mostrando eventos de exemplo.</Aviso>
+          <Aviso tipo="info">Não foi possível falar com o servidor: mostrando eventos de exemplo.</Aviso>
         )}
         {!usandoExemplos && sugestoes.length === 0 && (
           <p className="vazio">Nenhum evento com vagas por enquanto. Que tal criar um?</p>
