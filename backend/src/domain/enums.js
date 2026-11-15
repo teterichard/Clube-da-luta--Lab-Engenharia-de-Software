@@ -31,4 +31,23 @@ const StatusConvite = Object.freeze({
   RECUSADO: 'RECUSADO',
 });
 
-module.exports = { StatusAtividade, Visibilidade, Nivel, StatusParticipacao, StatusConvite };
+/** Comunidades (classe Comunidade do protótipo Java): papel e situação de cada membro. */
+const PapelMembro = Object.freeze({
+  ADMIN: 'ADMIN',
+  MEMBRO: 'MEMBRO',
+});
+
+const StatusMembro = Object.freeze({
+  ATIVO: 'ATIVO',
+  PENDENTE: 'PENDENTE', // pediu para entrar numa comunidade privada
+});
+
+module.exports = {
+  StatusAtividade,
+  Visibilidade,
+  Nivel,
+  StatusParticipacao,
+  StatusConvite,
+  PapelMembro,
+  StatusMembro,
+};

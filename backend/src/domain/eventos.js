@@ -13,6 +13,8 @@ const Eventos = Object.freeze({
   CONVITE_RESPONDIDO: 'convite.respondido',
   ATIVIDADE_EDITADA: 'atividade.editada',
   ATIVIDADE_CANCELADA: 'atividade.cancelada',
+  COMUNIDADE_PEDIDO_ENTRADA: 'comunidade.pedidoEntrada',
+  COMUNIDADE_PEDIDO_RESPONDIDO: 'comunidade.pedidoRespondido',
 });
 
 function criarPublicador({ aoFalhar = (erro) => console.error('Falha ao tratar evento:', erro) } = {}) {

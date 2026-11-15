@@ -4,6 +4,7 @@ Casos de uso implementados:
 
 - **5.2 — Criar Atividade** — plano: [`docs/plano-acao-criar-atividade.md`](../docs/plano-acao-criar-atividade.md)
 - **Inscrever-se em atividade** (caso de uso principal) — plano: [`docs/plano-acao-inscricao-atividade.md`](../docs/plano-acao-inscricao-atividade.md)
+- **Comunidades** — criar, descobrir, entrar/sair e administrar membros (portado do protótipo Java)
 - **Notificações** (padrão Observer) — solicitação, resposta, convite, mudança e cancelamento de atividade
 - **Convidar pessoas** (RF07, passo 4 do UC 5.2) — atividades privadas só por convite
 - **Gestão da atividade** (RF04/RF11) — editar, excluir, iniciar, cancelar e concluir
@@ -42,6 +43,14 @@ Todas exigem `Authorization: Bearer <jwt>` (o token vem do cadastro ou do login)
 | `GET` | `/api/convites` | Convites recebidos pelo usuário logado (`?status=PENDENTE`) |
 | `PATCH` | `/api/convites/:id` | Convidado responde `{ "decisao": "ACEITAR" }` ou `RECUSAR`; aceitar confirma a presença |
 | `PATCH` | `/api/participacoes/:id` | Organizador responde: `{ "decisao": "ACEITAR" }` ou `{ "decisao": "RECUSAR" }` |
+| `POST` | `/api/comunidades` | Cria comunidade `{ nome, descricao, visibilidade }`; quem cria vira admin |
+| `GET` | `/api/comunidades` | Todas as comunidades (`?busca=`), com `totalMembros`, `meuStatus`, `meuPapel` |
+| `GET` | `/api/comunidades/minhas` | Comunidades de que faço parte (inclui pedidos pendentes) |
+| `GET` / `PATCH` | `/api/comunidades/:id` | Detalhes / admin edita |
+| `GET` | `/api/comunidades/:id/membros` | Membros (privada: só para membros; pendentes: só para admins) |
+| `POST` | `/api/comunidades/:id/membros` | Entrar (pública: na hora; privada: pedido pendente) |
+| `DELETE` | `/api/comunidades/:id/membros/me` | Sair (o último admin não pode sair) |
+| `PATCH` | `/api/comunidades/:id/membros/:usuarioId` | Admin: `{ "decisao": "ACEITAR" \| "RECUSAR" }` ou `{ "papel": "ADMIN" }` |
 | `GET` | `/api/notificacoes` | Minhas notificações `{ naoLidas, itens }` (`?naoLidas=true` filtra) |
 | `PATCH` | `/api/notificacoes/:id/lida` | Marca uma como lida |
 | `POST` | `/api/notificacoes/lidas` | Marca todas como lidas |

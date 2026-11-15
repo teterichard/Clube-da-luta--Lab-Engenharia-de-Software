@@ -23,6 +23,10 @@ const { criarNotificacaoRepositoryMemoria } = require('./repositories/notificaca
 const { criarNotificacaoService } = require('./services/notificacaoService');
 const { criarNotificacaoController } = require('./controllers/notificacaoController');
 const { notificacaoRoutes } = require('./routes/notificacaoRoutes');
+const { criarComunidadeRepositoryMemoria } = require('./repositories/comunidadeRepositoryMemoria');
+const { criarComunidadeService } = require('./services/comunidadeService');
+const { criarComunidadeController } = require('./controllers/comunidadeController');
+const { comunidadeRoutes } = require('./routes/comunidadeRoutes');
 
 /**
  * Monta a aplicação Express sem subir o servidor (facilita testes com Supertest).
@@ -34,6 +38,7 @@ function criarApp({
   usuarioRepository = criarUsuarioRepositoryMemoria(),
   conviteRepository = criarConviteRepositoryMemoria(),
   notificacaoRepository = criarNotificacaoRepositoryMemoria(),
+  comunidadeRepository = criarComunidadeRepositoryMemoria(),
   comTrava,
   eventos = criarPublicador(),
   jwtSegredo,
@@ -49,6 +54,7 @@ function criarApp({
     ...repositorios,
     usuarioRepository,
     notificacaoRepository,
+    comunidadeRepository,
     comTrava: comTrava || criarTravaMemoria(repositorios),
     eventos,
     relogio,
@@ -59,6 +65,7 @@ function criarApp({
   const autenticacaoController = criarAutenticacaoController(criarAutenticacaoService({
     ...deps, jwtSegredo, jwtExpiracao, custoBcrypt,
   }));
+  const comunidadeController = criarComunidadeController(criarComunidadeService(deps));
   const notificacaoService = criarNotificacaoService(deps);
   notificacaoService.registrarObservadores();
   const notificacaoController = criarNotificacaoController(notificacaoService);
@@ -71,6 +78,7 @@ function criarApp({
     controller, participacaoController, conviteController, autenticar,
   }));
   app.use('/api/convites', conviteRoutes({ conviteController, autenticar }));
+  app.use('/api/comunidades', comunidadeRoutes({ comunidadeController, autenticar }));
   app.use('/api/notificacoes', notificacaoRoutes({ notificacaoController, autenticar }));
   app.use('/api/participacoes', participacaoRoutes({ participacaoController, autenticar }));
 

@@ -18,6 +18,9 @@ const TipoNotificacao = Object.freeze({
   CONVITE_RECUSADO: 'CONVITE_RECUSADO',
   ATIVIDADE_ALTERADA: 'ATIVIDADE_ALTERADA',
   ATIVIDADE_CANCELADA: 'ATIVIDADE_CANCELADA',
+  PEDIDO_COMUNIDADE: 'PEDIDO_COMUNIDADE',
+  PEDIDO_COMUNIDADE_ACEITO: 'PEDIDO_COMUNIDADE_ACEITO',
+  PEDIDO_COMUNIDADE_RECUSADO: 'PEDIDO_COMUNIDADE_RECUSADO',
 });
 
 const ativa = (p) => p.status === StatusParticipacao.PENDENTE || p.status === StatusParticipacao.ACEITO;
@@ -27,7 +30,11 @@ const aviso = (usuarioId, tipo, atividade, mensagem) => ({
   usuarioId, tipo, atividadeId: atividade.id, mensagem,
 });
 
-/** Evento → lista de { usuarioId, tipo, atividadeId, mensagem }. */
+const avisoComunidade = (usuarioId, tipo, comunidade, mensagem) => ({
+  usuarioId, tipo, comunidadeId: comunidade.id, mensagem,
+});
+
+/** Evento → lista de { usuarioId, tipo, atividadeId | comunidadeId, mensagem }. */
 const TRADUTORES = {
   [Eventos.PARTICIPACAO_SOLICITADA]: ({ atividade, participacao }, nome) => [
     aviso(atividade.organizadorId, TipoNotificacao.SOLICITACAO_RECEBIDA, atividade,
@@ -75,11 +82,29 @@ const TRADUTORES = {
   [Eventos.ATIVIDADE_CANCELADA]: ({ atividade, participacoes }) => participacoes.filter(ativa)
     .map((p) => aviso(p.usuarioId, TipoNotificacao.ATIVIDADE_CANCELADA, atividade,
       `"${atividade.titulo}" foi cancelada pelo organizador`)),
+
+  [Eventos.COMUNIDADE_PEDIDO_ENTRADA]: ({ comunidade, membro, adminIds }, nome) => adminIds
+    .map((id) => avisoComunidade(id, TipoNotificacao.PEDIDO_COMUNIDADE, comunidade,
+      `${nome(membro.usuarioId)} pediu para entrar em "${comunidade.nome}"`)),
+
+  [Eventos.COMUNIDADE_PEDIDO_RESPONDIDO]: ({ comunidade, usuarioId, aceito }) => [
+    avisoComunidade(
+      usuarioId,
+      aceito ? TipoNotificacao.PEDIDO_COMUNIDADE_ACEITO : TipoNotificacao.PEDIDO_COMUNIDADE_RECUSADO,
+      comunidade,
+      aceito ? `Você agora faz parte de "${comunidade.nome}"` : `Seu pedido para entrar em "${comunidade.nome}" não foi aceito`,
+    ),
+  ],
 };
 
 /** IDs de usuários citados no evento (para buscar os nomes de uma vez só). */
 function usuariosDoEvento(dados) {
-  const ids = [dados.atividade?.organizadorId, dados.participacao?.usuarioId, dados.convite?.convidadoId];
+  const ids = [
+    dados.atividade?.organizadorId,
+    dados.participacao?.usuarioId,
+    dados.convite?.convidadoId,
+    dados.membro?.usuarioId,
+  ];
   return ids.filter((id) => id != null);
 }
 
