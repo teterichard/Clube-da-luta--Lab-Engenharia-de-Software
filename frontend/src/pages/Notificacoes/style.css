@@ -1,11 +1,3 @@
-.pagina-topo {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
 .notificacao {
   width: 100%;
   display: flex;
