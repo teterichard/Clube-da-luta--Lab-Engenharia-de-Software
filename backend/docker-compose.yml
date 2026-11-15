@@ -10,3 +10,4 @@ services:
       - "3306:3306"
     volumes:
       - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/permissoes-teste.sql:/docker-entrypoint-initdb.d/02-permissoes-teste.sql:ro

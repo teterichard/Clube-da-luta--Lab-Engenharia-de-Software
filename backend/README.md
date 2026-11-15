@@ -64,8 +64,13 @@ npm run dev
 ## Testes
 
 ```bash
-npm test
+npm test             # unitários + API com repositórios em memória
+npm run test:mysql   # integração com MySQL de verdade (precisa do banco no ar, ex.: docker compose up -d)
 ```
+
+O teste de integração recria o banco `topaai_teste` (configurável em `DB_TEST_NAME`) a partir de `db/schema.sql`,
+e o usuário do banco precisa de permissão sobre ele (`db/permissoes-teste.sql`, aplicado automaticamente pelo
+`docker compose`). Na esteira de CI ele roda num serviço `mysql:8.0`.
 
 ## Exemplo de chamada
 
