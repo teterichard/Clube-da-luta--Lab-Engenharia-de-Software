@@ -12,6 +12,7 @@ function criarConviteService({
   participacaoRepository,
   usuarioRepository,
   conviteRepository,
+  comTrava,
   relogio = () => new Date(),
 }) {
   async function carregarAtividade(id) {
@@ -27,14 +28,14 @@ function criarConviteService({
   }
 
   /** Ao aceitar o convite a presença fica confirmada (participação ACEITO). */
-  async function confirmarPresenca(atividade, participacoes, usuarioId, agora) {
+  async function confirmarPresenca(participacaoRepositorio, atividade, participacoes, usuarioId, agora) {
     const pendente = participacoes.find(
       (p) => mesmoId(p.usuarioId, usuarioId) && p.status === StatusParticipacao.PENDENTE,
     );
     if (pendente) {
-      return participacaoRepository.atualizar({ ...pendente, status: StatusParticipacao.ACEITO, respondidaEm: agora });
+      return participacaoRepositorio.atualizar({ ...pendente, status: StatusParticipacao.ACEITO, respondidaEm: agora });
     }
-    return participacaoRepository.salvar({
+    return participacaoRepositorio.salvar({
       atividadeId: atividade.id,
       usuarioId,
       status: StatusParticipacao.ACEITO,
@@ -107,18 +108,24 @@ function criarConviteService({
 
     /** Convidado aceita ({ decisao: "ACEITAR" }) ou recusa ({ decisao: "RECUSAR" }). */
     async responder(conviteId, usuario, decisao) {
-      const convite = await conviteRepository.buscarPorId(conviteId);
-      if (!convite) throw new ErroNaoEncontrado('Convite não encontrado');
-      const atividade = await carregarAtividade(convite.atividadeId);
-      const participacoes = await participacaoRepository.listarPorAtividade(atividade.id);
-      const agora = relogio();
+      const encontrado = await conviteRepository.buscarPorId(conviteId);
+      if (!encontrado) throw new ErroNaoEncontrado('Convite não encontrado');
+      await carregarAtividade(encontrado.atividadeId);
 
-      const respondido = responderConvite(convite, atividade, participacoes, usuario, decisao, agora);
-      const salvo = await conviteRepository.atualizar(respondido);
-      if (salvo.status === StatusConvite.ACEITO) {
-        await confirmarPresenca(atividade, participacoes, usuario.id, agora);
-      }
-      return salvo;
+      // aceitar ocupa vaga: mesma trava por atividade usada no aceite de solicitações
+      return comTrava(encontrado.atividadeId, async (repos) => {
+        const convite = await repos.conviteRepository.buscarPorId(conviteId);
+        const atividade = await repos.atividadeRepository.buscarPorId(convite.atividadeId);
+        const participacoes = await repos.participacaoRepository.listarPorAtividade(atividade.id);
+        const agora = relogio();
+
+        const respondido = responderConvite(convite, atividade, participacoes, usuario, decisao, agora);
+        const salvo = await repos.conviteRepository.atualizar(respondido);
+        if (salvo.status === StatusConvite.ACEITO) {
+          await confirmarPresenca(repos.participacaoRepository, atividade, participacoes, usuario.id, agora);
+        }
+        return salvo;
+      });
     },
   };
 }

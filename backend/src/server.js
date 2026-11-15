@@ -8,6 +8,7 @@ const { criarUsuarioRepositoryMemoria } = require('./repositories/usuarioReposit
 const { criarUsuarioRepositoryMySQL } = require('./repositories/usuarioRepositoryMySQL');
 const { criarConviteRepositoryMemoria } = require('./repositories/conviteRepositoryMemoria');
 const { criarConviteRepositoryMySQL } = require('./repositories/conviteRepositoryMySQL');
+const { criarTravaMySQL } = require('./repositories/travaMySQL');
 
 function criarRepositorios() {
   if (env.usarMemoria) {
@@ -26,6 +27,7 @@ function criarRepositorios() {
     participacaoRepository: criarParticipacaoRepositoryMySQL(pool),
     usuarioRepository: criarUsuarioRepositoryMySQL(pool),
     conviteRepository: criarConviteRepositoryMySQL(pool),
+    comTrava: criarTravaMySQL(pool),
   };
 }
 
