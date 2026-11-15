@@ -3,12 +3,17 @@ import { Link, useLocation, useParams } from 'react-router-dom'
 import './style.css'
 
 import Aviso from '../../components/Aviso'
+import Tag from '../../components/Tag'
 import Solicitacoes from './Solicitacoes'
-import { buscarAtividade, solicitarParticipacao } from '../../services/api'
+import Convites from './Convites'
+import AcoesOrganizador from './AcoesOrganizador'
+import MinhaParticipacao from './MinhaParticipacao'
+import { buscarAtividade } from '../../services/api'
 import { useAuth } from '../../contexts/AuthContext'
 import { imagemDoTipo, formatarData, textoDaLista, TIPOS, NIVEIS, PUBLICOS } from '../../utils/atividade'
+import { STATUS_ATIVIDADE } from '../../utils/status'
 
-// UC "Inscrever-se em atividade" — passos 5 (ver detalhes e vagas) e 6 (solicitar participação)
+// UC "Inscrever-se em atividade" — passo 5 (ver detalhes e vagas) e ações de participante e organizador
 function DetalhesAtividade() {
   const { id } = useParams()
   const location = useLocation()
@@ -17,9 +22,6 @@ function DetalhesAtividade() {
   const [atividade, setAtividade] = useState(null)
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
-  const [mensagem, setMensagem] = useState(location.state?.criada ? 'Atividade criada com sucesso!' : '')
-  const [erroInscricao, setErroInscricao] = useState('')
-  const [enviando, setEnviando] = useState(false)
 
   function carregar() {
     return buscarAtividade(id)
@@ -29,63 +31,51 @@ function DetalhesAtividade() {
   }
 
   useEffect(() => {
+    setCarregando(true)
     carregar()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
-  async function inscrever() {
-    setEnviando(true)
-    setErroInscricao('')
-    setMensagem('')
-    try {
-      await solicitarParticipacao(id)
-      setMensagem('Solicitação enviada! Agora é só aguardar o organizador aceitar.')
-    } catch (e) {
-      // 409: sem vagas, já solicitou, atividade já começou...
-      setErroInscricao(e.message)
-    } finally {
-      setEnviando(false)
-    }
-  }
-
-  if (carregando) return <main className="pagina"><p className="vazio">Carregando...</p></main>
+  if (carregando) return <main id="conteudo" className="pagina"><p className="vazio" role="status">Carregando...</p></main>
 
   if (erro) {
     return (
-      <main className="pagina">
+      <main id="conteudo" className="pagina">
         <Link to="/busca" className="voltar">← Voltar para a busca</Link>
         <Aviso tipo="erro">{erro}</Aviso>
       </main>
     )
   }
 
-  const souOrganizador = usuario && String(usuario.id) === String(atividade.organizadorId)
+  const souOrganizador = String(usuario.id) === String(atividade.organizadorId)
   const ocupadas = atividade.numeroIntegrantes - atividade.vagas
   const porcentagem = Math.round((ocupadas / atividade.numeroIntegrantes) * 100)
 
   return (
-    <main className="pagina">
-      <Link to="/busca" className="voltar">← Voltar para a busca</Link>
+    <main id="conteudo" className="pagina">
+      <Link to={souOrganizador ? '/' : '/busca'} className="voltar">← Voltar</Link>
 
-      <Aviso tipo="sucesso">{mensagem}</Aviso>
+      <Aviso tipo="sucesso">{location.state?.mensagem}</Aviso>
 
-      <div className="painel detalhe">
-        <img className="detalhe-img" src={imagemDoTipo(atividade.tipo)} alt={atividade.titulo} />
+      <article className="painel detalhe">
+        <img className="detalhe-img" src={imagemDoTipo(atividade.tipo)} alt="" />
 
         <div className="tags">
+          {atividade.status !== 'AGENDADA' && <Tag mapa={STATUS_ATIVIDADE} status={atividade.status} />}
           <span className="tag tag_roxa">{textoDaLista(TIPOS, atividade.tipo)}</span>
           <span className="tag">{textoDaLista(NIVEIS, atividade.nivel)}</span>
           <span className="tag">{textoDaLista(PUBLICOS, atividade.publicoAlvo)}</span>
           {atividade.visibilidade === 'PRIVADA' && <span className="tag tag_amarela">Privada</span>}
+          {souOrganizador && <span className="tag tag_verde">Você organiza</span>}
         </div>
 
-        <h2 className="pagina-titulo">{atividade.titulo}</h2>
+        <h1 className="pagina-titulo">{atividade.titulo}</h1>
         {atividade.descricao && <p className="detalhe-desc">{atividade.descricao}</p>}
 
         <ul className="detalhe-infos">
-          <li><span>📅</span> {formatarData(atividade.dataHora)}</li>
-          <li><span>📍</span> {atividade.local}</li>
-          <li><span>👥</span> {atividade.numeroIntegrantes} integrantes</li>
+          <li><span aria-hidden="true">📅</span> {formatarData(atividade.dataHora)}</li>
+          <li><span aria-hidden="true">📍</span> {atividade.local}</li>
+          <li><span aria-hidden="true">👥</span> {atividade.numeroIntegrantes} integrantes</li>
         </ul>
 
         <div className="vagas">
@@ -93,23 +83,22 @@ function DetalhesAtividade() {
             <strong>{atividade.vagas > 0 ? `${atividade.vagas} vagas restantes` : 'Sem vagas'}</strong>
             <span>{ocupadas}/{atividade.numeroIntegrantes} confirmados</span>
           </div>
-          <div className="vagas-barra">
+          <div className="vagas-barra" role="progressbar" aria-label="Vagas preenchidas"
+            aria-valuemin={0} aria-valuemax={atividade.numeroIntegrantes} aria-valuenow={ocupadas}>
             <div className="vagas-preenchido" style={{ width: `${porcentagem}%` }}></div>
           </div>
         </div>
 
-        {!souOrganizador && (
-          <>
-            <Aviso tipo="erro">{erroInscricao}</Aviso>
-            <button className="btn detalhe-btn" onClick={inscrever} disabled={enviando || atividade.vagas === 0}>
-              {atividade.vagas === 0 ? 'Atividade lotada' : enviando ? 'Enviando...' : 'Solicitar participação'}
-            </button>
-          </>
-        )}
-      </div>
+        {!souOrganizador && <MinhaParticipacao atividade={atividade} onAtualizar={carregar} />}
+      </article>
 
-      {/* passo 7: só o organizador vê e responde as solicitações */}
-      {souOrganizador && <Solicitacoes atividadeId={atividade.id} onAtualizar={carregar} />}
+      {souOrganizador && (
+        <>
+          <AcoesOrganizador atividade={atividade} onAtualizar={setAtividade} />
+          <Solicitacoes atividade={atividade} onAtualizar={carregar} />
+          <Convites atividade={atividade} />
+        </>
+      )}
     </main>
   )
 }
