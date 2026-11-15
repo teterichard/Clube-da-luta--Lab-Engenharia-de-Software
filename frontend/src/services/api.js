@@ -130,3 +130,50 @@ export function listarSolicitacoes(atividadeId) {
 export function responderSolicitacao(participacaoId, decisao) {
   return requisicao(`/participacoes/${participacaoId}`, { method: 'PATCH', body: { decisao } })
 }
+
+// ---- Gestão da atividade pelo organizador (RF04 / RF11) ----
+
+export function editarAtividade(id, dados) {
+  return requisicao(`/atividades/${id}`, { method: 'PATCH', body: dados })
+}
+
+export function excluirAtividade(id) {
+  return requisicao(`/atividades/${id}`, { method: 'DELETE' })
+}
+
+/** acao: 'iniciar' | 'cancelar' | 'concluir' */
+export function mudarStatusAtividade(id, acao) {
+  return requisicao(`/atividades/${id}/${acao}`, { method: 'POST' })
+}
+
+export function listarAtividadesOrganizadas() {
+  return requisicao('/atividades/organizadas')
+}
+
+// ---- Minhas inscrições ----
+
+export function listarMinhasInscricoes() {
+  return requisicao('/participacoes/minhas')
+}
+
+export function cancelarInscricao(participacaoId) {
+  return requisicao(`/participacoes/${participacaoId}/cancelar`, { method: 'POST' })
+}
+
+// ---- Convites (RF07) ----
+
+export function convidar(atividadeId, email) {
+  return requisicao(`/atividades/${atividadeId}/convites`, { method: 'POST', body: { email } })
+}
+
+export function listarConvitesDaAtividade(atividadeId) {
+  return requisicao(`/atividades/${atividadeId}/convites`)
+}
+
+export function listarConvitesRecebidos(status) {
+  return requisicao(`/convites${status ? `?status=${status}` : ''}`)
+}
+
+export function responderConvite(conviteId, decisao) {
+  return requisicao(`/convites/${conviteId}`, { method: 'PATCH', body: { decisao } })
+}

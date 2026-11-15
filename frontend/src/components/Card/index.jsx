@@ -1,23 +1,26 @@
 import './style.css';
 
-// info: linha pequena opcional (ex.: data e vagas) / onClick: ação do botão
-function Card({ titulo, desc, asset, btn_txt, btn_type, info, onClick }) {
+// info: linha pequena opcional (ex.: data e vagas) · selo: elemento opcional acima do título (ex.: <Tag />)
+// onClick: ação do botão — o aria-label inclui o título para o leitor de tela saber de qual card é o botão
+function Card({ titulo, desc, asset, btn_txt, btn_type, info, selo, onClick }) {
 
   return (
-    <div className="card-componente">
-      <img className="card-img" src={asset} alt={titulo}></img>
-      <h2 className="card-header">{titulo || "Título padrão"}</h2>
+    <article className="card-componente">
+      <img className="card-img" src={asset} alt=""></img>
+      {selo && <div className="card-selo">{selo}</div>}
+      <h3 className="card-header">{titulo}</h3>
       {info && <span className="card-info">{info}</span>}
-      <p  className="card-text"> {desc || "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae urna et tortor finibus mollis ut in dui. Sed scelerisque nisi a urna pulvinar ornare."}  </p>
+      {desc && <p className="card-text">{desc}</p>}
       <div className="div-btn">
 
     {btn_txt && (
-    <button className={`card-btn ${btn_type == "focused" ? `card-btn_focused` : ''}`} onClick={onClick}>
+    <button type="button" className={`card-btn ${btn_type === "focused" ? `card-btn_focused` : ''}`} onClick={onClick}
+      aria-label={`${btn_txt}: ${titulo}`}>
         {btn_txt}
     </button>
     )}
       </div>
-    </div>
+    </article>
   );
 }
 

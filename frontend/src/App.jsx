@@ -12,6 +12,8 @@ import Home from './pages/Home'
 import Busca from './pages/Busca'
 import CriarAtividade from './pages/CriarAtividade'
 import DetalhesAtividade from './pages/DetalhesAtividade'
+import EditarAtividade from './pages/EditarAtividade'
+import Convites from './pages/Convites'
 import Perfil from './pages/Perfil'
 import Entrar from './pages/Entrar'
 import Cadastro from './pages/Cadastro'
@@ -34,6 +36,8 @@ function App() {
           <Route path="/busca" element={<Busca />} />
           <Route path="/atividades/nova" element={<CriarAtividade />} />
           <Route path="/atividades/:id" element={<DetalhesAtividade />} />
+          <Route path="/atividades/:id/editar" element={<EditarAtividade />} />
+          <Route path="/convites" element={<Convites />} />
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/comunidades" element={<EmBreve titulo="Comunidades" />} />
         </Route>
