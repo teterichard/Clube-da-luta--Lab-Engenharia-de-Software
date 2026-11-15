@@ -14,18 +14,31 @@ function criarParticipacaoService({
   atividadeRepository,
   participacaoRepository,
   usuarioRepository,
+  comTrava,
   relogio = () => new Date(),
 }) {
-  async function carregarAtividade(id) {
-    const atividade = await atividadeRepository.buscarPorId(id);
+  async function carregarAtividade(id, repo = atividadeRepository) {
+    const atividade = await repo.buscarPorId(id);
     if (!atividade) throw new ErroNaoEncontrado('Atividade não encontrada');
     return atividade;
   }
 
-  async function carregarParticipacao(id) {
-    const participacao = await participacaoRepository.buscarPorId(id);
+  async function carregarParticipacao(id, repo = participacaoRepository) {
+    const participacao = await repo.buscarPorId(id);
     if (!participacao) throw new ErroNaoEncontrado('Solicitação não encontrada');
     return participacao;
+  }
+
+  /**
+   * Tudo que lê as vagas e depois grava roda com a atividade travada: a leitura e a
+   * escrita viram uma operação só, e aceites simultâneos não estouram o limite.
+   */
+  async function naAtividade(atividadeId, fn) {
+    await carregarAtividade(atividadeId); // 404 antes de abrir a trava
+    return comTrava(atividadeId, async (repos) => {
+      const atividade = await carregarAtividade(atividadeId, repos.atividadeRepository);
+      return fn(atividade, repos);
+    });
   }
 
   /** Acrescenta { usuario: { id, nome } } para o organizador saber quem pediu. */
@@ -38,10 +51,11 @@ function criarParticipacaoService({
   return {
     /** Passo 6 — participante clica em "Solicitar participação" (CT-01, CT-04, CT-06). */
     async solicitar(atividadeId, usuario) {
-      const atividade = await carregarAtividade(atividadeId);
-      const participacoes = await participacaoRepository.listarPorAtividade(atividade.id);
-      const nova = solicitarParticipacao(atividade, participacoes, usuario, relogio());
-      return participacaoRepository.salvar(nova);
+      return naAtividade(atividadeId, async (atividade, repos) => {
+        const participacoes = await repos.participacaoRepository.listarPorAtividade(atividade.id);
+        const nova = solicitarParticipacao(atividade, participacoes, usuario, relogio());
+        return repos.participacaoRepository.salvar(nova);
+      });
     },
 
     /** Organizador vê as solicitações da sua atividade. */
@@ -81,21 +95,26 @@ function criarParticipacaoService({
 
     /** P6 — participante desiste da solicitação ou da vaga confirmada. */
     async cancelar(participacaoId, usuario) {
-      const participacao = await carregarParticipacao(participacaoId);
-      const atividade = await carregarAtividade(participacao.atividadeId);
-      const cancelada = cancelarParticipacao(atividade, participacao, usuario, relogio());
-      return participacaoRepository.atualizar(cancelada);
+      const { atividadeId } = await carregarParticipacao(participacaoId);
+      return naAtividade(atividadeId, async (atividade, repos) => {
+        const participacao = await carregarParticipacao(participacaoId, repos.participacaoRepository);
+        const cancelada = cancelarParticipacao(atividade, participacao, usuario, relogio());
+        return repos.participacaoRepository.atualizar(cancelada);
+      });
     },
 
     /** Passo 7 — organizador aceita (CT-01) ou recusa (CT-05). */
     async responder(participacaoId, usuario, decisao) {
-      const participacao = await carregarParticipacao(participacaoId);
-      const atividade = await carregarAtividade(participacao.atividadeId);
-      const participacoes = await participacaoRepository.listarPorAtividade(atividade.id);
-      const respondida = responderSolicitacao(
-        atividade, participacao, participacoes, usuario, decisao, relogio(),
-      );
-      return participacaoRepository.atualizar(respondida);
+      const { atividadeId } = await carregarParticipacao(participacaoId);
+      return naAtividade(atividadeId, async (atividade, repos) => {
+        // relê dentro da trava: outra requisição pode ter respondido ou ocupado a vaga
+        const participacao = await carregarParticipacao(participacaoId, repos.participacaoRepository);
+        const participacoes = await repos.participacaoRepository.listarPorAtividade(atividade.id);
+        const respondida = responderSolicitacao(
+          atividade, participacao, participacoes, usuario, decisao, relogio(),
+        );
+        return repos.participacaoRepository.atualizar(respondida);
+      });
     },
   };
 }
