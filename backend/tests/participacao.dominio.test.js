@@ -2,6 +2,7 @@ const {
   calcularVagas,
   solicitarParticipacao,
   responderSolicitacao,
+  cancelarParticipacao,
 } = require('../src/domain/participacao');
 const { lerFiltros, aplicarFiltros } = require('../src/domain/filtros');
 const {
@@ -110,6 +111,36 @@ describe('Domínio — responderSolicitacao (passo 7)', () => {
   test('decisão inválida gera ErroValidacao', () => {
     const p = participacao(2, 'PENDENTE');
     expect(() => responderSolicitacao(atividade(), p, [p], organizador, 'talvez', AGORA)).toThrow(ErroValidacao);
+  });
+});
+
+describe('Domínio — cancelarParticipacao (P6)', () => {
+  test('participante cancela solicitação pendente ou aceita', () => {
+    expect(cancelarParticipacao(atividade(), participacao(2, 'PENDENTE'), joao, AGORA))
+      .toMatchObject({ status: 'CANCELADO', canceladaEm: AGORA });
+    expect(cancelarParticipacao(atividade(), participacao(2, 'ACEITO'), joao, AGORA).status).toBe('CANCELADO');
+  });
+
+  test('cancelar uma aceita devolve a vaga', () => {
+    const aceita = participacao(2, 'ACEITO');
+    expect(calcularVagas(atividade(), [aceita])).toBe(1);
+    expect(calcularVagas(atividade(), [cancelarParticipacao(atividade(), aceita, joao, AGORA)])).toBe(2);
+  });
+
+  test('só o próprio participante cancela', () => {
+    expect(() => cancelarParticipacao(atividade(), participacao(2, 'PENDENTE'), maria, AGORA)).toThrow(ErroProibido);
+    expect(() => cancelarParticipacao(atividade(), participacao(2, 'PENDENTE'), organizador, AGORA)).toThrow(ErroProibido);
+  });
+
+  test('não cancela o que já foi recusado/cancelado nem atividade fora de AGENDADA', () => {
+    expect(() => cancelarParticipacao(atividade(), participacao(2, 'REJEITADO'), joao, AGORA)).toThrow(ErroRegraNegocio);
+    expect(() => cancelarParticipacao(atividade(), participacao(2, 'CANCELADO'), joao, AGORA)).toThrow(ErroRegraNegocio);
+    expect(() => cancelarParticipacao(atividade({ status: 'ATIVA' }), participacao(2, 'ACEITO'), joao, AGORA))
+      .toThrow(ErroRegraNegocio);
+  });
+
+  test('depois de cancelar, pode solicitar de novo', () => {
+    expect(solicitarParticipacao(atividade(), [participacao(2, 'CANCELADO')], joao, AGORA).status).toBe('PENDENTE');
   });
 });
 
