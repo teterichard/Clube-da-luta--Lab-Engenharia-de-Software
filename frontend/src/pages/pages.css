@@ -238,3 +238,77 @@
   padding: 20px 0;
   text-align: center;
 }
+
+/* Grupo de opções (fieldset) com a mesma cara de um .campo */
+.campo-grupo {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.campo-grupo legend {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 4px;
+  padding: 0;
+}
+
+.tag_cinza {
+  background: #eef0f3;
+  color: #4b5563;
+}
+
+/* Some visualmente, mas continua disponível para leitores de tela */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Lista simples de itens em linha (convites, notificações, comunidades) */
+.lista-cartoes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cartao-linha {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f1f4;
+  flex-wrap: wrap;
+}
+
+.cartao-linha:last-child {
+  border-bottom: none;
+}
+
+.cartao-titulo {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+  text-decoration: none;
+}
+
+.cartao-titulo:hover {
+  text-decoration: underline;
+}
+
+.cartao-sub {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+}
