@@ -1,34 +1,16 @@
 const env = require('./config/env');
 const { criarApp } = require('./app');
-const { criarAtividadeRepositoryMemoria } = require('./repositories/atividadeRepositoryMemoria');
-const { criarAtividadeRepositoryMySQL } = require('./repositories/atividadeRepositoryMySQL');
-const { criarParticipacaoRepositoryMemoria } = require('./repositories/participacaoRepositoryMemoria');
-const { criarParticipacaoRepositoryMySQL } = require('./repositories/participacaoRepositoryMySQL');
-const { criarUsuarioRepositoryMemoria } = require('./repositories/usuarioRepositoryMemoria');
-const { criarUsuarioRepositoryMySQL } = require('./repositories/usuarioRepositoryMySQL');
-const { criarConviteRepositoryMemoria } = require('./repositories/conviteRepositoryMemoria');
-const { criarConviteRepositoryMySQL } = require('./repositories/conviteRepositoryMySQL');
-const { criarTravaMySQL } = require('./repositories/travaMySQL');
+const { criarRepositoriosMySQL } = require('./repositories/mysql');
 
 function criarRepositorios() {
   if (env.usarMemoria) {
+    // o app usa repositórios em memória quando nenhum é informado
     console.log('Usando repositórios em memória (DB_IN_MEMORY=true)');
-    return {
-      atividadeRepository: criarAtividadeRepositoryMemoria(),
-      participacaoRepository: criarParticipacaoRepositoryMemoria(),
-      usuarioRepository: criarUsuarioRepositoryMemoria(),
-      conviteRepository: criarConviteRepositoryMemoria(),
-    };
+    return {};
   }
   const mysql = require('mysql2/promise');
   const pool = mysql.createPool({ ...env.db, waitForConnections: true, connectionLimit: 10 });
-  return {
-    atividadeRepository: criarAtividadeRepositoryMySQL(pool),
-    participacaoRepository: criarParticipacaoRepositoryMySQL(pool),
-    usuarioRepository: criarUsuarioRepositoryMySQL(pool),
-    conviteRepository: criarConviteRepositoryMySQL(pool),
-    comTrava: criarTravaMySQL(pool),
-  };
+  return criarRepositoriosMySQL(pool);
 }
 
 const app = criarApp({

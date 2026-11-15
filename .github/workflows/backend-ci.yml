@@ -31,3 +31,44 @@ jobs:
 
       - name: Rodar os testes (Jest)
         run: npm test
+
+  integracao-mysql:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_USER: topaai
+          MYSQL_PASSWORD: topaai
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Permitir que o usuário de teste crie o banco
+        run: mysql -h 127.0.0.1 -uroot -proot < db/permissoes-teste.sql
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Testes de integração com MySQL
+        run: npm run test:mysql
+        env:
+          DB_HOST: 127.0.0.1
