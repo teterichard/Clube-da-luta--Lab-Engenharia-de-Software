@@ -15,6 +15,10 @@ import DetalhesAtividade from './pages/DetalhesAtividade'
 import EditarAtividade from './pages/EditarAtividade'
 import Convites from './pages/Convites'
 import Notificacoes from './pages/Notificacoes'
+import Comunidades from './pages/Comunidades'
+import CriarComunidade from './pages/CriarComunidade'
+import DetalhesComunidade from './pages/DetalhesComunidade'
+import EditarComunidade from './pages/EditarComunidade'
 import Perfil from './pages/Perfil'
 import Entrar from './pages/Entrar'
 import Cadastro from './pages/Cadastro'
@@ -41,7 +45,10 @@ function App() {
           <Route path="/convites" element={<Convites />} />
           <Route path="/notificacoes" element={<Notificacoes />} />
           <Route path="/perfil" element={<Perfil />} />
-          <Route path="/comunidades" element={<EmBreve titulo="Comunidades" />} />
+          <Route path="/comunidades" element={<Comunidades />} />
+          <Route path="/comunidades/nova" element={<CriarComunidade />} />
+          <Route path="/comunidades/:id" element={<DetalhesComunidade />} />
+          <Route path="/comunidades/:id/editar" element={<EditarComunidade />} />
         </Route>
 
         <Route path="*" element={<EmBreve titulo="Página não encontrada" />} />
