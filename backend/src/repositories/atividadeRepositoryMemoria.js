@@ -11,6 +11,13 @@ function criarAtividadeRepositoryMemoria() {
       atividades.set(salva.id, salva);
       return salva;
     },
+    async atualizar(atividade) {
+      atividades.set(atividade.id, { ...atividade });
+      return { ...atividade };
+    },
+    async remover(id) {
+      atividades.delete(Number(id));
+    },
     async buscarPorId(id) {
       return atividades.get(Number(id)) || null;
     },

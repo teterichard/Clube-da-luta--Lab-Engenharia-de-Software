@@ -14,6 +14,7 @@ function paraAtividade(l) {
     status: l.status,
     organizadorId: l.organizador_id,
     criadaEm: l.criada_em,
+    atualizadaEm: l.atualizada_em,
   };
 }
 
@@ -29,6 +30,22 @@ function criarAtividadeRepositoryMySQL(pool) {
           a.numeroIntegrantes, a.visibilidade, a.status, a.organizadorId, a.criadaEm],
       );
       return { id: resultado.insertId, ...a };
+    },
+
+    async atualizar(a) {
+      await pool.execute(
+        `UPDATE atividade
+            SET titulo = ?, descricao = ?, tipo = ?, nivel = ?, publico_alvo = ?, data_hora = ?,
+                local = ?, numero_integrantes = ?, visibilidade = ?, status = ?, atualizada_em = ?
+          WHERE id = ?`,
+        [a.titulo, a.descricao, a.tipo, a.nivel, a.publicoAlvo, a.dataHora, a.local,
+          a.numeroIntegrantes, a.visibilidade, a.status, a.atualizadaEm ?? null, a.id],
+      );
+      return a;
+    },
+
+    async remover(id) {
+      await pool.execute('DELETE FROM atividade WHERE id = ?', [id]);
     },
 
     async buscarPorId(id) {

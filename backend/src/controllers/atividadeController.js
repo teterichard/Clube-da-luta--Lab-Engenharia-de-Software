@@ -21,6 +21,20 @@ function criarAtividadeController(atividadeService) {
     detalhar: tratar(async (req, res) => {
       res.json(await atividadeService.detalhar(req.params.id, req.usuario));
     }),
+
+    editar: tratar(async (req, res) => {
+      res.json(await atividadeService.editar(req.params.id, req.body, req.usuario));
+    }),
+
+    /** POST /:id/iniciar | /:id/cancelar | /:id/concluir — a ação vem do fim da rota. */
+    mudarStatus: (acao) => tratar(async (req, res) => {
+      res.json(await atividadeService.mudarStatus(req.params.id, acao, req.usuario));
+    }),
+
+    excluir: tratar(async (req, res) => {
+      await atividadeService.excluir(req.params.id, req.usuario);
+      res.status(204).end();
+    }),
   };
 }
 

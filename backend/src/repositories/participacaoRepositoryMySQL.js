@@ -34,6 +34,10 @@ function criarParticipacaoRepositoryMySQL(pool) {
       return linhas.length === 0 ? null : paraParticipacao(linhas[0]);
     },
 
+    async removerPorAtividade(atividadeId) {
+      await pool.execute('DELETE FROM participacao WHERE atividade_id = ?', [atividadeId]);
+    },
+
     async listarPorAtividade(atividadeId) {
       const [linhas] = await pool.execute(
         'SELECT * FROM participacao WHERE atividade_id = ? ORDER BY solicitada_em',

@@ -19,6 +19,11 @@ function criarParticipacaoRepositoryMemoria() {
       const p = participacoes.get(Number(id));
       return p ? { ...p } : null;
     },
+    async removerPorAtividade(atividadeId) {
+      [...participacoes.values()]
+        .filter((p) => String(p.atividadeId) === String(atividadeId))
+        .forEach((p) => participacoes.delete(p.id));
+    },
     async listarPorAtividade(atividadeId) {
       return [...participacoes.values()]
         .filter((p) => String(p.atividadeId) === String(atividadeId))

@@ -1,11 +1,32 @@
-const { criarAtividade } = require('../domain/atividade');
+const {
+  criarAtividade,
+  editarAtividade,
+  mudarStatus,
+  verificarExclusao,
+} = require('../domain/atividade');
 const { lerFiltros, aplicarFiltros } = require('../domain/filtros');
 const { calcularVagas, ehOrganizador } = require('../domain/participacao');
-const { Visibilidade } = require('../domain/enums');
+const { Visibilidade, StatusParticipacao } = require('../domain/enums');
 const { ErroNaoAutenticado, ErroNaoEncontrado } = require('../domain/erros');
 
 /** Casos de uso de Atividade. Recebe os repositórios por injeção de dependência. */
 function criarAtividadeService({ atividadeRepository, participacaoRepository, relogio = () => new Date() }) {
+  async function carregar(id) {
+    const atividade = await atividadeRepository.buscarPorId(id);
+    if (!atividade) throw new ErroNaoEncontrado('Atividade não encontrada');
+    return atividade;
+  }
+
+  async function comVagas(atividade) {
+    const participacoes = await participacaoRepository.listarPorAtividade(atividade.id);
+    return { ...atividade, vagas: calcularVagas(atividade, participacoes) };
+  }
+
+  async function contarAceitos(atividadeId) {
+    const participacoes = await participacaoRepository.listarPorAtividade(atividadeId);
+    return participacoes.filter((p) => p.status === StatusParticipacao.ACEITO).length;
+  }
+
   return {
     /** UC 5.2 — Criar Atividade (passos 2 e 3). */
     async criar(dados, organizador) {
@@ -35,8 +56,29 @@ function criarAtividadeService({ atividadeRepository, participacaoRepository, re
         || (atividade.visibilidade === Visibilidade.PRIVADA && !ehOrganizador(atividade, usuario))) {
         throw new ErroNaoEncontrado('Atividade não encontrada');
       }
-      const participacoes = await participacaoRepository.listarPorAtividade(atividade.id);
-      return { ...atividade, vagas: calcularVagas(atividade, participacoes) };
+      return comVagas(atividade);
+    },
+
+    /** RF04 — organizador edita a atividade enquanto ela está agendada. */
+    async editar(id, dados, usuario) {
+      const atual = await carregar(id);
+      const editada = editarAtividade(atual, dados, usuario, await contarAceitos(atual.id), relogio());
+      return comVagas(await atividadeRepository.atualizar(editada));
+    },
+
+    /** RF11 — iniciar, cancelar ou concluir. */
+    async mudarStatus(id, acao, usuario) {
+      const atual = await carregar(id);
+      const alterada = mudarStatus(atual, usuario, acao, relogio());
+      return comVagas(await atividadeRepository.atualizar(alterada));
+    },
+
+    /** RF04 — excluir (só sem participantes aceitos; com eles, o organizador cancela). */
+    async excluir(id, usuario) {
+      const atual = await carregar(id);
+      verificarExclusao(atual, usuario, await contarAceitos(atual.id));
+      await participacaoRepository.removerPorAtividade(atual.id);
+      await atividadeRepository.remover(atual.id);
     },
   };
 }
