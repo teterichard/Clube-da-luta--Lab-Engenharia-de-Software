@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import Aviso from '../../components/Aviso'
-import { criarAtividade, getToken } from '../../services/api'
+import { criarAtividade } from '../../services/api'
 import { TIPOS, NIVEIS, PUBLICOS } from '../../utils/atividade'
 
 // UC "Criar atividade" (seção 5.2 do documento / docs/plano-acao-criar-atividade.md)
@@ -81,7 +81,7 @@ function CriarAtividade() {
       const porCampo = {}
       erro.detalhes.forEach((d) => { porCampo[d.campo] = d.mensagem })
       setErros(porCampo)
-      setErroGeral(erro.status === 401 ? 'Você precisa estar logado para criar uma atividade.' : erro.message)
+      setErroGeral(erro.message)
     } finally {
       setEnviando(false)
     }
@@ -102,11 +102,6 @@ function CriarAtividade() {
       <h2 className="pagina-titulo">Criar atividade</h2>
       <p className="pagina-subtitulo">Preencha os dados e convide a galera para participar.</p>
 
-      {!getToken() && (
-        <Aviso tipo="info">
-          Você ainda não está logado. <Link to="/perfil">Entre com um token de teste</Link> antes de salvar.
-        </Aviso>
-      )}
       <Aviso tipo="erro">{erroGeral}</Aviso>
 
       <form className="painel form" onSubmit={enviar} noValidate>

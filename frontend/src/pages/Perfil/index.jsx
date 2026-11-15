@@ -1,60 +1,91 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 
 import Aviso from '../../components/Aviso'
-import { getToken, setToken, getUsuarioLogado } from '../../services/api'
+import Campo from '../../components/Campo'
+import { useAuth } from '../../contexts/AuthContext'
+import { atualizarPerfil } from '../../services/api'
+import { NIVEIS } from '../../utils/atividade'
 
-// Enquanto o UC de login (RF01/RF02) não existe, o usuário cola aqui um token JWT de teste.
-// Gerar token: cd backend && node scripts/gerarToken.js 1 Organizador
+// Perfil do usuário logado: dados usados para sugerir atividades do nível certo (persona Francisco)
 function Perfil() {
-  const navigate = useNavigate()
-  const [token, setTokenTexto] = useState(getToken() || '')
-  const [erro, setErro] = useState('')
-  const usuario = getUsuarioLogado()
+  const { usuario, atualizarUsuario, sair } = useAuth()
 
-  function entrar(e) {
-    e.preventDefault()
-    if (token.split('.').length !== 3) {
-      setErro('Isso não parece um token JWT (deve ter 3 partes separadas por ponto).')
-      return
-    }
-    setToken(token)
-    navigate('/')
+  const [form, setForm] = useState({
+    nome: usuario.nome || '',
+    localizacao: usuario.localizacao || '',
+    idade: usuario.idade ?? '',
+    proficiencia: usuario.proficiencia || '',
+  })
+  const [erros, setErros] = useState({})
+  const [mensagem, setMensagem] = useState('')
+  const [erroGeral, setErroGeral] = useState('')
+  const [salvando, setSalvando] = useState(false)
+
+  function alterar(campo, valor) {
+    setForm({ ...form, [campo]: valor })
+    setErros({ ...erros, [campo]: undefined })
+    setMensagem('')
   }
 
-  function sair() {
-    setToken(null)
-    setTokenTexto('')
-    navigate('/')
+  async function salvar(e) {
+    e.preventDefault()
+    setErroGeral('')
+    setSalvando(true)
+    try {
+      const atualizado = await atualizarPerfil({
+        nome: form.nome.trim(),
+        localizacao: form.localizacao.trim(),
+        idade: form.idade === '' ? null : Number(form.idade),
+        proficiencia: form.proficiencia || null,
+      })
+      atualizarUsuario(atualizado)
+      setMensagem('Perfil atualizado!')
+    } catch (erro) {
+      const porCampo = {}
+      erro.detalhes.forEach((d) => { porCampo[d.campo] = d.mensagem })
+      setErros(porCampo)
+      setErroGeral(erro.message)
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  function encerrar() {
+    // a rota protegida leva para /entrar sozinha
+    sair({ voluntario: true })
   }
 
   return (
-    <main className="pagina">
-      <h2 className="pagina-titulo">Perfil</h2>
+    <main id="conteudo" className="pagina pagina_estreita">
+      <h1 className="pagina-titulo">Meu perfil</h1>
+      <p className="pagina-subtitulo">{usuario.email}</p>
 
-      {usuario ? (
-        <div className="painel">
-          <p>Logado como <strong>{usuario.nome || 'Usuário'}</strong> (id {usuario.id})</p>
-          <br />
-          <button className="btn btn_vermelho btn_pequeno" onClick={sair}>Sair</button>
-        </div>
-      ) : (
-        <Aviso tipo="info">Você não está logado.</Aviso>
-      )}
+      <Aviso tipo="sucesso">{mensagem}</Aviso>
+      <Aviso tipo="erro">{erroGeral}</Aviso>
 
-      <form className="painel form" onSubmit={entrar}>
-        <div className="campo">
-          <label htmlFor="token">Token de teste (JWT)</label>
-          <textarea id="token" value={token} onChange={(e) => { setTokenTexto(e.target.value); setErro('') }}
-            placeholder="eyJhbGciOiJIUzI1NiIs..." />
-          <span className="campo-dica">
-            Login de verdade ainda vai ser feito. Gere um token com{' '}
-            <code>node scripts/gerarToken.js 1 Organizador</code> dentro da pasta backend.
-          </span>
+      <form className="painel form" onSubmit={salvar} noValidate>
+        <Campo nome="nome" label="Nome" erro={erros.nome}>
+          <input id="nome" value={form.nome} onChange={(e) => alterar('nome', e.target.value)} />
+        </Campo>
+        <Campo nome="localizacao" label="Bairro ou cidade" erro={erros.localizacao}>
+          <input id="localizacao" value={form.localizacao} onChange={(e) => alterar('localizacao', e.target.value)} />
+        </Campo>
+        <div className="form-linha">
+          <Campo nome="idade" label="Idade" erro={erros.idade}>
+            <input id="idade" type="number" min="13" max="120" value={form.idade}
+              onChange={(e) => alterar('idade', e.target.value)} />
+          </Campo>
+          <Campo nome="proficiencia" label="Nível em geral" erro={erros.proficiencia}>
+            <select id="proficiencia" value={form.proficiencia} onChange={(e) => alterar('proficiencia', e.target.value)}>
+              <option value="">Prefiro não dizer</option>
+              {NIVEIS.map((n) => <option key={n.valor} value={n.valor}>{n.texto}</option>)}
+            </select>
+          </Campo>
         </div>
-        <Aviso tipo="erro">{erro}</Aviso>
-        <button className="btn" type="submit">Entrar</button>
+        <button className="btn" type="submit" disabled={salvando}>{salvando ? 'Salvando...' : 'Salvar alterações'}</button>
       </form>
+
+      <button className="btn btn_vermelho btn_pequeno" type="button" onClick={encerrar}>Sair da conta</button>
     </main>
   )
 }

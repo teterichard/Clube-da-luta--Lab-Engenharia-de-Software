@@ -4,14 +4,15 @@ import './style.css'
 
 import Aviso from '../../components/Aviso'
 import Solicitacoes from './Solicitacoes'
-import { buscarAtividade, solicitarParticipacao, getUsuarioLogado } from '../../services/api'
+import { buscarAtividade, solicitarParticipacao } from '../../services/api'
+import { useAuth } from '../../contexts/AuthContext'
 import { imagemDoTipo, formatarData, textoDaLista, TIPOS, NIVEIS, PUBLICOS } from '../../utils/atividade'
 
 // UC "Inscrever-se em atividade" — passos 5 (ver detalhes e vagas) e 6 (solicitar participação)
 function DetalhesAtividade() {
   const { id } = useParams()
   const location = useLocation()
-  const usuario = getUsuarioLogado()
+  const { usuario } = useAuth()
 
   const [atividade, setAtividade] = useState(null)
   const [carregando, setCarregando] = useState(true)
