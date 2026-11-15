@@ -1,0 +1,221 @@
+/* Estilos compartilhados entre as páginas (formulários, painéis, botões) */
+
+.pagina {
+  background: #E2E6F0;
+  padding: 15px;
+  flex: 1;
+  text-align: start;
+}
+
+.pagina-titulo {
+  margin: 0 0 4px 0;
+  font-size: 20px;
+  color: var(--text-h);
+}
+
+.pagina-subtitulo {
+  font-size: 13px;
+  margin: 0 0 14px 0;
+  color: #4b5563;
+}
+
+.voltar {
+  display: inline-block;
+  font-size: 13px;
+  color: #4f46e5;
+  text-decoration: none;
+  margin-bottom: 10px;
+}
+
+.painel {
+  background: #ffffff;
+  border-radius: 15px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+/* ---- Formulário ---- */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-linha {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  @media (max-width: 500px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.campo label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+  font: inherit;
+  font-size: 13px;
+  padding: 9px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1f2937;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.campo textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.campo_erro input,
+.campo_erro select,
+.campo_erro textarea {
+  border-color: #e5484d;
+}
+
+.campo-erro {
+  font-size: 11px;
+  color: #b42318;
+}
+
+.campo-dica {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* Botões "Pública / Privada" */
+.opcoes {
+  display: flex;
+  gap: 8px;
+}
+
+.opcao {
+  flex: 1;
+  padding: 9px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  font-size: 13px;
+  cursor: pointer;
+  color: #374151;
+}
+
+.opcao_ativa {
+  border-color: #6366f1;
+  background: rgba(99, 102, 241, 0.1);
+  color: #4338ca;
+  font-weight: 600;
+}
+
+/* ---- Botões ---- */
+
+.btn {
+  background-color: #6366f1;
+  color: #ffffff;
+  border: none;
+  padding: 11px 18px;
+  font-size: 13px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  text-align: center;
+}
+
+.btn:hover {
+  background-color: #4f46e5;
+}
+
+.btn:disabled {
+  background-color: #a5a8f3;
+  cursor: not-allowed;
+}
+
+.btn_cinza {
+  background-color: #4b5563;
+}
+
+.btn_cinza:hover {
+  background-color: #374151;
+}
+
+.btn_vermelho {
+  background-color: #e5484d;
+}
+
+.btn_vermelho:hover {
+  background-color: #c93a3f;
+}
+
+.btn_pequeno {
+  padding: 7px 12px;
+  font-size: 11px;
+  border-radius: 8px;
+}
+
+/* ---- Selos (tags) ---- */
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f1f2f6;
+  color: #374151;
+}
+
+.tag_roxa {
+  background: rgba(99, 102, 241, 0.12);
+  color: #4338ca;
+}
+
+.tag_verde {
+  background: #e7f6ec;
+  color: #1e7b3c;
+}
+
+.tag_amarela {
+  background: #fff4d6;
+  color: #92600a;
+}
+
+.tag_vermelha {
+  background: #fdecec;
+  color: #b42318;
+}
+
+.vazio {
+  font-size: 13px;
+  color: #6b7280;
+  padding: 20px 0;
+  text-align: center;
+}
