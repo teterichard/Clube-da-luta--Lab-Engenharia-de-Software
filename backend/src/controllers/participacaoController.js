@@ -11,6 +11,14 @@ function criarParticipacaoController(participacaoService) {
       res.json(await participacaoService.listarDaAtividade(req.params.id, req.usuario));
     }),
 
+    listarMinhas: tratar(async (req, res) => {
+      res.json(await participacaoService.listarMinhas(req.usuario));
+    }),
+
+    cancelar: tratar(async (req, res) => {
+      res.json(await participacaoService.cancelar(req.params.id, req.usuario));
+    }),
+
     responder: tratar(async (req, res) => {
       const decisao = (req.body || {}).decisao;
       res.json(await participacaoService.responder(req.params.id, req.usuario, decisao));
