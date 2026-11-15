@@ -81,3 +81,7 @@
 .card-componente .card-text {
   flex: 1;
 }
+
+.card-selo {
+  margin-top: 6px;
+}

@@ -37,3 +37,20 @@
   align-items: center;
   justify-content: center;
 }
+
+.home-aviso-convite {
+  display: block;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fff4d6;
+  color: #7a4a00;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: start;
+  text-decoration: none;
+}
+
+.home-aviso-convite:hover {
+  background: #ffeab0;
+}
