@@ -4,6 +4,7 @@ Casos de uso implementados:
 
 - **5.2 — Criar Atividade** — plano: [`docs/plano-acao-criar-atividade.md`](../docs/plano-acao-criar-atividade.md)
 - **Inscrever-se em atividade** (caso de uso principal) — plano: [`docs/plano-acao-inscricao-atividade.md`](../docs/plano-acao-inscricao-atividade.md)
+- **Notificações** (padrão Observer) — solicitação, resposta, convite, mudança e cancelamento de atividade
 - **Convidar pessoas** (RF07, passo 4 do UC 5.2) — atividades privadas só por convite
 - **Gestão da atividade** (RF04/RF11) — editar, excluir, iniciar, cancelar e concluir
 - **Autenticação** (RF01/RF02) — cadastro, login com senha em bcrypt (RNF04) e perfil
@@ -41,6 +42,9 @@ Todas exigem `Authorization: Bearer <jwt>` (o token vem do cadastro ou do login)
 | `GET` | `/api/convites` | Convites recebidos pelo usuário logado (`?status=PENDENTE`) |
 | `PATCH` | `/api/convites/:id` | Convidado responde `{ "decisao": "ACEITAR" }` ou `RECUSAR`; aceitar confirma a presença |
 | `PATCH` | `/api/participacoes/:id` | Organizador responde: `{ "decisao": "ACEITAR" }` ou `{ "decisao": "RECUSAR" }` |
+| `GET` | `/api/notificacoes` | Minhas notificações `{ naoLidas, itens }` (`?naoLidas=true` filtra) |
+| `PATCH` | `/api/notificacoes/:id/lida` | Marca uma como lida |
+| `POST` | `/api/notificacoes/lidas` | Marca todas como lidas |
 | `GET` | `/api/participacoes/minhas` | Minhas inscrições, com resumo de cada atividade |
 | `POST` | `/api/participacoes/:id/cancelar` | Participante desiste (pendente ou aceita; devolve a vaga) |
 
