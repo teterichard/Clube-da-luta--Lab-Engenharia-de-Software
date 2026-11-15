@@ -194,3 +194,43 @@ export function marcarNotificacaoLida(id) {
 export function marcarTodasNotificacoesLidas() {
   return requisicao('/notificacoes/lidas', { method: 'POST' })
 }
+
+// ---- Comunidades ----
+
+export function listarComunidades(busca) {
+  const termo = (busca || '').trim()
+  return requisicao(`/comunidades${termo ? `?busca=${encodeURIComponent(termo)}` : ''}`)
+}
+
+export function listarMinhasComunidades() {
+  return requisicao('/comunidades/minhas')
+}
+
+export function criarComunidade(dados) {
+  return requisicao('/comunidades', { method: 'POST', body: dados })
+}
+
+export function buscarComunidade(id) {
+  return requisicao(`/comunidades/${id}`)
+}
+
+export function editarComunidade(id, dados) {
+  return requisicao(`/comunidades/${id}`, { method: 'PATCH', body: dados })
+}
+
+export function listarMembros(id) {
+  return requisicao(`/comunidades/${id}/membros`)
+}
+
+export function entrarNaComunidade(id) {
+  return requisicao(`/comunidades/${id}/membros`, { method: 'POST' })
+}
+
+export function sairDaComunidade(id) {
+  return requisicao(`/comunidades/${id}/membros/me`, { method: 'DELETE' })
+}
+
+/** dados: { decisao: 'ACEITAR' | 'RECUSAR' } ou { papel: 'ADMIN' } */
+export function gerenciarMembro(id, usuarioId, dados) {
+  return requisicao(`/comunidades/${id}/membros/${usuarioId}`, { method: 'PATCH', body: dados })
+}
