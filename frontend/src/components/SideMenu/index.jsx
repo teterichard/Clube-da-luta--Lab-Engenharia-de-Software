@@ -1,7 +1,8 @@
+import { useEffect, useRef } from 'react'
 import { NavLink } from 'react-router-dom'
 import './style.css'
 
-// Menu lateral (wireframe 4.4): Eventos, Comunidades, Busca e Contato
+// Menu lateral (wireframe 4.4)
 const LINKS = [
   { para: '/', texto: 'Eventos' },
   { para: '/busca', texto: 'Busca' },
@@ -12,15 +13,28 @@ const LINKS = [
   { para: '/contato', texto: 'Contato' },
 ]
 
-function SideMenu({ aberto, onFechar }) {
+// Fechado, o menu fica `inert`: some do Tab e do leitor de tela, em vez de só sair da tela.
+// Aberto, o foco vai para o botão de fechar e Esc fecha.
+function SideMenu({ id, aberto, onFechar }) {
+  const fechar = useRef(null)
+
+  useEffect(() => {
+    if (!aberto) return undefined
+    fechar.current?.focus()
+    const aoTeclar = (e) => { if (e.key === 'Escape') onFechar() }
+    document.addEventListener('keydown', aoTeclar)
+    return () => document.removeEventListener('keydown', aoTeclar)
+  }, [aberto, onFechar])
+
   return (
     <>
-      <div className={`menu-fundo ${aberto ? 'menu-fundo_aberto' : ''}`} onClick={onFechar}></div>
+      <div className={`menu-fundo ${aberto ? 'menu-fundo_aberto' : ''}`} onClick={onFechar} aria-hidden="true"></div>
 
-      <nav className={`menu-lateral ${aberto ? 'menu-lateral_aberto' : ''}`}>
+      <nav id={id} className={`menu-lateral ${aberto ? 'menu-lateral_aberto' : ''}`} aria-label="Menu principal"
+        inert={!aberto}>
         <div className="menu-topo">
           <span className="menu-titulo">Topa-aí</span>
-          <button className="menu-fechar" onClick={onFechar} aria-label="Fechar menu">×</button>
+          <button ref={fechar} className="menu-fechar" onClick={onFechar} aria-label="Fechar menu">×</button>
         </div>
 
         {LINKS.map((link) => (

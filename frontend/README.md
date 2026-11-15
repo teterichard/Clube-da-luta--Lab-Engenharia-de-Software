@@ -1,16 +1,56 @@
-# React + Vite
+# Topa-aí — Front-end (React + Vite)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Aplicação web do Topa-aí. Conversa com a API do [back-end](../backend/README.md) pelo caminho `/api`
+(no desenvolvimento, o Vite redireciona `/api` para `http://localhost:3000`).
 
-Currently, two official plugins are available:
+## Rodando
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+# em outro terminal, suba a API (ex.: cd backend && DB_IN_MEMORY=true npm run dev)
+npm install
+npm run dev        # http://localhost:5173
+npm run lint       # oxlint
+npm run build      # gera dist/
+```
 
-## React Compiler
+Para apontar para outra API, defina `VITE_API_URL` (ex.: `VITE_API_URL=https://api.exemplo.com/api`).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Telas
 
-## Expanding the Oxlint configuration
+| Rota | Tela | Caso de uso |
+|---|---|---|
+| `/entrar`, `/cadastro` | Login e criação de conta | RF01/RF02 |
+| `/` | Início: minhas inscrições, atividades que organizo, convites pendentes e sugestões | — |
+| `/busca` | Lista de atividades com filtros | Inscrever-se (passos 2–4) |
+| `/atividades/nova`, `/atividades/:id/editar` | Criar e editar atividade | UC 5.2 / RF04 |
+| `/atividades/:id` | Detalhes: solicitar, cancelar, aceitar convite; para o organizador, gerenciar status, solicitações e convites | Inscrever-se (5–7), RF07, RF11 |
+| `/convites` | Convites recebidos | RF07 |
+| `/notificacoes` | Central de notificações (também no sininho do topo) | — |
+| `/comunidades`, `/comunidades/nova`, `/comunidades/:id` | Descobrir, criar e participar de comunidades | Comunidades |
+| `/perfil` | Editar perfil e sair | — |
+| `/contato` | Sobre o projeto e como falar com a equipe | — |
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Todas as telas, menos entrar, cadastro e contato, exigem login (`components/RotaProtegida`).
+
+## Organização
+
+```
+src/
+├── components/   # peças reutilizáveis (Header, Card, Campo, FormAtividade, Tag...)
+├── contexts/     # AuthContext: sessão do usuário
+├── hooks/        # useTituloPagina
+├── pages/        # uma pasta por tela (index.jsx + style.css)
+├── services/     # api.js: todas as chamadas à API
+└── utils/        # textos de status, listas de tipos/níveis e formatação
+```
+
+## Acessibilidade
+
+A wiki define acessibilidade e inclusão como critério de qualidade. O que já está garantido:
+
+- navegação completa pelo teclado, com link "Pular para o conteúdo" e foco sempre visível;
+- campos com label, mensagens de erro ligadas ao campo (`aria-describedby`) e avisos anunciados (`role="alert"`/`"status"`);
+- contraste mínimo WCAG AA nas cores;
+- título da aba por página e `prefers-reduced-motion` respeitado.
+
+As telas foram auditadas com [axe-core](https://github.com/dequelabs/axe-core) (regras WCAG 2 A/AA) sem violações.

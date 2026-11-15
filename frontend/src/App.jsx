@@ -6,6 +6,7 @@ import './pages/pages.css'
 // Componentes
 import Header from './components/Header'
 import RotaProtegida from './components/RotaProtegida'
+import { useTituloPagina } from './hooks/useTituloPagina'
 
 // Páginas
 import Home from './pages/Home'
@@ -22,9 +23,12 @@ import EditarComunidade from './pages/EditarComunidade'
 import Perfil from './pages/Perfil'
 import Entrar from './pages/Entrar'
 import Cadastro from './pages/Cadastro'
-import EmBreve from './pages/EmBreve'
+import NaoEncontrada from './pages/NaoEncontrada'
+import Contato from './pages/Contato'
 
 function App() {
+  useTituloPagina()
+
   return (
     <>
       <Header />
@@ -33,7 +37,7 @@ function App() {
         {/* públicas */}
         <Route path="/entrar" element={<Entrar />} />
         <Route path="/cadastro" element={<Cadastro />} />
-        <Route path="/contato" element={<EmBreve titulo="Contato" />} />
+        <Route path="/contato" element={<Contato />} />
 
         {/* exigem login (todas as rotas da API são autenticadas) */}
         <Route element={<RotaProtegida />}>
@@ -51,7 +55,7 @@ function App() {
           <Route path="/comunidades/:id/editar" element={<EditarComunidade />} />
         </Route>
 
-        <Route path="*" element={<EmBreve titulo="Página não encontrada" />} />
+        <Route path="*" element={<NaoEncontrada />} />
       </Routes>
 
       <footer></footer>
