@@ -4,6 +4,8 @@ const { criarAtividadeRepositoryMemoria } = require('./repositories/atividadeRep
 const { criarAtividadeRepositoryMySQL } = require('./repositories/atividadeRepositoryMySQL');
 const { criarParticipacaoRepositoryMemoria } = require('./repositories/participacaoRepositoryMemoria');
 const { criarParticipacaoRepositoryMySQL } = require('./repositories/participacaoRepositoryMySQL');
+const { criarUsuarioRepositoryMemoria } = require('./repositories/usuarioRepositoryMemoria');
+const { criarUsuarioRepositoryMySQL } = require('./repositories/usuarioRepositoryMySQL');
 
 function criarRepositorios() {
   if (env.usarMemoria) {
@@ -11,6 +13,7 @@ function criarRepositorios() {
     return {
       atividadeRepository: criarAtividadeRepositoryMemoria(),
       participacaoRepository: criarParticipacaoRepositoryMemoria(),
+      usuarioRepository: criarUsuarioRepositoryMemoria(),
     };
   }
   const mysql = require('mysql2/promise');
@@ -18,10 +21,15 @@ function criarRepositorios() {
   return {
     atividadeRepository: criarAtividadeRepositoryMySQL(pool),
     participacaoRepository: criarParticipacaoRepositoryMySQL(pool),
+    usuarioRepository: criarUsuarioRepositoryMySQL(pool),
   };
 }
 
-const app = criarApp({ ...criarRepositorios(), jwtSegredo: env.jwtSegredo });
+const app = criarApp({
+  ...criarRepositorios(),
+  jwtSegredo: env.jwtSegredo,
+  jwtExpiracao: env.jwtExpiracao,
+});
 
 app.listen(env.porta, () => {
   console.log(`Topa-aí API rodando em http://localhost:${env.porta}`);
