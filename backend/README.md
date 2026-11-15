@@ -4,6 +4,7 @@ Casos de uso implementados:
 
 - **5.2 — Criar Atividade** — plano: [`docs/plano-acao-criar-atividade.md`](../docs/plano-acao-criar-atividade.md)
 - **Inscrever-se em atividade** (caso de uso principal) — plano: [`docs/plano-acao-inscricao-atividade.md`](../docs/plano-acao-inscricao-atividade.md)
+- **Gestão da atividade** (RF04/RF11) — editar, excluir, iniciar, cancelar e concluir
 - **Autenticação** (RF01/RF02) — cadastro, login com senha em bcrypt (RNF04) e perfil
 
 ## Endpoints
@@ -26,6 +27,11 @@ Todas exigem `Authorization: Bearer <jwt>` (o token vem do cadastro ou do login)
 | `POST` | `/api/atividades` | Cria atividade (organizador = usuário do token) |
 | `GET` | `/api/atividades` | Lista atividades públicas e agendadas, com `vagas`. Filtros: `tipo`, `nivel`, `publicoAlvo`, `local` (parcial), `data` (AAAA-MM-DD), `comVaga=true` |
 | `GET` | `/api/atividades/:id` | Detalhes da atividade + vagas restantes |
+| `PATCH` | `/api/atividades/:id` | Organizador edita (só `AGENDADA`; não reduz abaixo dos aceitos) |
+| `DELETE` | `/api/atividades/:id` | Organizador exclui (só se ninguém foi aceito — senão, cancele) |
+| `POST` | `/api/atividades/:id/iniciar` | `AGENDADA` → `ATIVA` |
+| `POST` | `/api/atividades/:id/cancelar` | `AGENDADA`/`ATIVA` → `CANCELADA` |
+| `POST` | `/api/atividades/:id/concluir` | `ATIVA` → `CONCLUIDA` |
 | `POST` | `/api/atividades/:id/participacoes` | Solicita participação (status `PENDENTE`) |
 | `GET` | `/api/atividades/:id/participacoes` | Organizador vê as solicitações da atividade |
 | `PATCH` | `/api/participacoes/:id` | Organizador responde: `{ "decisao": "ACEITAR" }` ou `{ "decisao": "RECUSAR" }` |
