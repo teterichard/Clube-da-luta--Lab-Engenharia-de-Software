@@ -22,7 +22,7 @@ import EditarComunidade from './pages/EditarComunidade'
 import Perfil from './pages/Perfil'
 import Entrar from './pages/Entrar'
 import Cadastro from './pages/Cadastro'
-import EmBreve from './pages/EmBreve'
+import NaoEncontrada from './pages/NaoEncontrada'
 import Contato from './pages/Contato'
 
 function App() {
@@ -52,7 +52,7 @@ function App() {
           <Route path="/comunidades/:id/editar" element={<EditarComunidade />} />
         </Route>
 
-        <Route path="*" element={<EmBreve titulo="Página não encontrada" />} />
+        <Route path="*" element={<NaoEncontrada />} />
       </Routes>
 
       <footer></footer>
