@@ -53,6 +53,14 @@ function criarAtividadeRepositoryMySQL(pool) {
       return linhas.length === 0 ? null : paraAtividade(linhas[0]);
     },
 
+    async listarPorOrganizador(organizadorId) {
+      const [linhas] = await pool.execute(
+        'SELECT * FROM atividade WHERE organizador_id = ? ORDER BY data_hora',
+        [organizadorId],
+      );
+      return linhas.map(paraAtividade);
+    },
+
     /** Públicas, agendadas e futuras. Os filtros (Strategy) são aplicados no serviço. */
     async listarAbertas(agora) {
       const [linhas] = await pool.execute(

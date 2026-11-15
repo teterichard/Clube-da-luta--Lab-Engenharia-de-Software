@@ -29,6 +29,12 @@ function criarParticipacaoRepositoryMemoria() {
         .filter((p) => String(p.atividadeId) === String(atividadeId))
         .map((p) => ({ ...p }));
     },
+    async listarPorUsuario(usuarioId) {
+      return [...participacoes.values()]
+        .filter((p) => String(p.usuarioId) === String(usuarioId))
+        .sort((a, b) => new Date(b.solicitadaEm) - new Date(a.solicitadaEm))
+        .map((p) => ({ ...p }));
+    },
     /** Map atividadeId → quantidade de participações ACEITAS (para calcular vagas na listagem). */
     async contarAceitas(atividadeIds) {
       const contagem = new Map(atividadeIds.map((id) => [id, 0]));

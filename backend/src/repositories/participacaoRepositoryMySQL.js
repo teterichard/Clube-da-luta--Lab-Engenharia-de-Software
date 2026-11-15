@@ -7,6 +7,7 @@ function paraParticipacao(l) {
     status: l.status,
     solicitadaEm: l.solicitada_em,
     respondidaEm: l.respondida_em,
+    canceladaEm: l.cancelada_em,
   };
 }
 
@@ -23,8 +24,8 @@ function criarParticipacaoRepositoryMySQL(pool) {
 
     async atualizar(p) {
       await pool.execute(
-        'UPDATE participacao SET status = ?, respondida_em = ? WHERE id = ?',
-        [p.status, p.respondidaEm, p.id],
+        'UPDATE participacao SET status = ?, respondida_em = ?, cancelada_em = ? WHERE id = ?',
+        [p.status, p.respondidaEm ?? null, p.canceladaEm ?? null, p.id],
       );
       return p;
     },
@@ -42,6 +43,14 @@ function criarParticipacaoRepositoryMySQL(pool) {
       const [linhas] = await pool.execute(
         'SELECT * FROM participacao WHERE atividade_id = ? ORDER BY solicitada_em',
         [atividadeId],
+      );
+      return linhas.map(paraParticipacao);
+    },
+
+    async listarPorUsuario(usuarioId) {
+      const [linhas] = await pool.execute(
+        'SELECT * FROM participacao WHERE usuario_id = ? ORDER BY solicitada_em DESC',
+        [usuarioId],
       );
       return linhas.map(paraParticipacao);
     },
