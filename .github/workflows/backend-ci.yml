@@ -2,10 +2,10 @@ name: Esteira CI - Back-end Node
 
 on:
   push:
-    branches: [ "main", "feature/**" ]
+    branches: [ "main", "develop", "feature/**" ]
     paths: [ "backend/**", ".github/workflows/backend-ci.yml" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
     paths: [ "backend/**", ".github/workflows/backend-ci.yml" ]
   workflow_dispatch:
 

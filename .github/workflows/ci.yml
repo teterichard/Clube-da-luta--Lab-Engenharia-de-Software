@@ -1,10 +1,12 @@
-name: Esteira CI - Topa-aí
+name: Esteira CI - Protótipo Java
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
+    paths: [ "src/**", "pom.xml", ".github/workflows/ci.yml" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
+    paths: [ "src/**", "pom.xml", ".github/workflows/ci.yml" ]
   workflow_dispatch:
 
 jobs:
