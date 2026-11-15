@@ -177,3 +177,20 @@ export function listarConvitesRecebidos(status) {
 export function responderConvite(conviteId, decisao) {
   return requisicao(`/convites/${conviteId}`, { method: 'PATCH', body: { decisao } })
 }
+
+// ---- Notificações ----
+
+// Avisado quando a tela de notificações marca algo como lido (o sininho do topo atualiza o contador)
+export const EVENTO_NOTIFICACOES_LIDAS = 'topaai:notificacoes-lidas'
+
+export function listarNotificacoes({ naoLidas = false } = {}) {
+  return requisicao(`/notificacoes${naoLidas ? '?naoLidas=true' : ''}`)
+}
+
+export function marcarNotificacaoLida(id) {
+  return requisicao(`/notificacoes/${id}/lida`, { method: 'PATCH' })
+}
+
+export function marcarTodasNotificacoesLidas() {
+  return requisicao('/notificacoes/lidas', { method: 'POST' })
+}
