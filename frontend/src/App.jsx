@@ -23,6 +23,7 @@ import Perfil from './pages/Perfil'
 import Entrar from './pages/Entrar'
 import Cadastro from './pages/Cadastro'
 import EmBreve from './pages/EmBreve'
+import Contato from './pages/Contato'
 
 function App() {
   return (
@@ -33,7 +34,7 @@ function App() {
         {/* públicas */}
         <Route path="/entrar" element={<Entrar />} />
         <Route path="/cadastro" element={<Cadastro />} />
-        <Route path="/contato" element={<EmBreve titulo="Contato" />} />
+        <Route path="/contato" element={<Contato />} />
 
         {/* exigem login (todas as rotas da API são autenticadas) */}
         <Route element={<RotaProtegida />}>
