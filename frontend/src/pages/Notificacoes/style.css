@@ -1,0 +1,45 @@
+.pagina-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.notificacao {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 12px;
+  border: none;
+  border-bottom: 1px solid #f0f1f4;
+  background: none;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.notificacao:hover {
+  background: #f6f7fb;
+}
+
+.notificacao_nova {
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.notificacao_nova .notificacao-texto {
+  font-weight: 600;
+}
+
+.notificacao-texto {
+  font-size: 13px;
+  color: var(--text-h);
+}
+
+.notificacao-data {
+  font-size: 11px;
+  color: #6b7280;
+}

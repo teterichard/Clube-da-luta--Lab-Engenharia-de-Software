@@ -7,6 +7,7 @@ const LINKS = [
   { para: '/busca', texto: 'Busca' },
   { para: '/atividades/nova', texto: 'Criar atividade' },
   { para: '/convites', texto: 'Meus convites' },
+  { para: '/notificacoes', texto: 'Notificações' },
   { para: '/comunidades', texto: 'Comunidades' },
   { para: '/contato', texto: 'Contato' },
 ]
