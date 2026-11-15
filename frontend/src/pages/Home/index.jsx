@@ -73,12 +73,12 @@ function Home() {
             </Link>
           )}
 
-          <section className="subcontentBox" aria-labelledby="titulo-inscricoes">
+          <section className="subcontentBox">
             <h2 id="titulo-inscricoes" className="contentTitle">Suas inscrições</h2>
             {dados.inscricoes.length === 0 ? (
               <p className="vazio">Você ainda não se inscreveu em nada. <Link to="/busca">Encontre uma atividade</Link></p>
             ) : (
-              <Carousel>
+              <Carousel rotulo="Suas inscrições">
                 {dados.inscricoes.map((p) => (
                   <Card key={p.id} titulo={p.atividade.titulo} asset={imagemDoTipo(p.atividade.tipo)}
                     selo={<Tag mapa={STATUS_PARTICIPACAO} status={p.status} />}
@@ -90,9 +90,9 @@ function Home() {
           </section>
 
           {dados.organizadas.length > 0 && (
-            <section className="subcontentBox" aria-labelledby="titulo-organizadas">
+            <section className="subcontentBox">
               <h2 id="titulo-organizadas" className="contentTitle">Atividades que você organiza</h2>
-              <Carousel>
+              <Carousel rotulo="Atividades que você organiza">
                 {dados.organizadas.map((a) => (
                   <Card key={a.id} titulo={a.titulo} asset={imagemDoTipo(a.tipo)}
                     selo={a.pendentes > 0
@@ -105,12 +105,12 @@ function Home() {
             </section>
           )}
 
-          <section className="subcontentBox" aria-labelledby="titulo-sugestoes">
+          <section className="subcontentBox">
             <h2 id="titulo-sugestoes" className="contentTitle">Sugestão de novos eventos</h2>
             {dados.sugestoes.length === 0 ? (
               <p className="vazio">Nenhum evento com vagas por enquanto. Que tal criar um?</p>
             ) : (
-              <Carousel>
+              <Carousel rotulo="Sugestão de novos eventos">
                 {dados.sugestoes.map((a) => (
                   <Card key={a.id} titulo={a.titulo} asset={imagemDoTipo(a.tipo)} desc={a.descricao || a.local}
                     info={`${formatarData(a.dataHora)} · ${a.vagas} vagas`}

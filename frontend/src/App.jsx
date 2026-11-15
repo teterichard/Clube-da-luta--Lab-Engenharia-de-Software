@@ -6,6 +6,7 @@ import './pages/pages.css'
 // Componentes
 import Header from './components/Header'
 import RotaProtegida from './components/RotaProtegida'
+import { useTituloPagina } from './hooks/useTituloPagina'
 
 // Páginas
 import Home from './pages/Home'
@@ -26,6 +27,8 @@ import NaoEncontrada from './pages/NaoEncontrada'
 import Contato from './pages/Contato'
 
 function App() {
+  useTituloPagina()
+
   return (
     <>
       <Header />

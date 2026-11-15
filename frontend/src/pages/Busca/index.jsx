@@ -46,30 +46,31 @@ function Busca() {
   }
 
   return (
-    <main className="pagina">
-      <h2 className="pagina-titulo">Buscar atividades</h2>
+    <main id="conteudo" className="pagina">
+      <h1 className="pagina-titulo">Buscar atividades</h1>
       <p className="pagina-subtitulo">Filtre por modalidade, nível, público e data.</p>
 
       <div className="painel filtros">
-        <select value={filtros.tipo} onChange={(e) => alterar('tipo', e.target.value)}>
+        <select aria-label="Modalidade" value={filtros.tipo} onChange={(e) => alterar('tipo', e.target.value)}>
           <option value="">Todas as modalidades</option>
           {TIPOS.map((t) => <option key={t.valor} value={t.valor}>{t.texto}</option>)}
         </select>
 
-        <select value={filtros.nivel} onChange={(e) => alterar('nivel', e.target.value)}>
+        <select aria-label="Nível" value={filtros.nivel} onChange={(e) => alterar('nivel', e.target.value)}>
           <option value="">Qualquer nível</option>
           {NIVEIS.map((n) => <option key={n.valor} value={n.valor}>{n.texto}</option>)}
         </select>
 
-        <select value={filtros.publicoAlvo} onChange={(e) => alterar('publicoAlvo', e.target.value)}>
+        <select aria-label="Público" value={filtros.publicoAlvo} onChange={(e) => alterar('publicoAlvo', e.target.value)}>
           <option value="">Qualquer público</option>
           {PUBLICOS.map((p) => <option key={p.valor} value={p.valor}>{p.texto}</option>)}
         </select>
 
-        <input type="date" value={filtros.data} onChange={(e) => alterar('data', e.target.value)} />
+        <input type="date" aria-label="Data" value={filtros.data} onChange={(e) => alterar('data', e.target.value)} />
 
         <input
           className="filtro-local"
+          aria-label="Local"
           placeholder="Local (ex.: Ibirapuera)"
           value={local}
           onChange={(e) => alterar('local', e.target.value)}
@@ -85,11 +86,12 @@ function Busca() {
 
       <Aviso tipo="erro">{erro}</Aviso>
 
-      {carregando && <p className="vazio">Carregando...</p>}
+      {carregando && <p className="vazio" role="status">Carregando...</p>}
 
       {!carregando && !erro && (
         <>
-          <p className="resultado-qtd">{atividades.length} atividade(s) encontrada(s)</p>
+          <h2 className="sr-only">Resultados</h2>
+          <p className="resultado-qtd" role="status">{atividades.length} atividade(s) encontrada(s)</p>
           {atividades.length === 0 && (
             <p className="vazio">Nada por aqui com esses filtros 😕 Tente mudar alguma opção.</p>
           )}

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import './style.css'
 
@@ -12,6 +12,7 @@ function Header({ mostrarBusca = true }) {
   const [menuAberto, setMenuAberto] = useState(false)
   const navigate = useNavigate()
   const { usuario } = useAuth()
+  const fecharMenu = useCallback(() => setMenuAberto(false), [])
 
   // A busca da barra leva para a tela de Busca filtrando pelo local digitado
   function buscar(termo) {
@@ -20,10 +21,12 @@ function Header({ mostrarBusca = true }) {
 
   return (
     <header>
+      <a href="#conteudo" className="pular-conteudo">Pular para o conteúdo</a>
       <div className="firstBox">
-        <button className="icon-btn" onClick={() => setMenuAberto(true)} aria-label="Abrir menu">
+        <button className="icon-btn" onClick={() => setMenuAberto(true)} aria-label="Abrir menu"
+          aria-expanded={menuAberto} aria-controls="menu-principal">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <line x1="4" y1="6" x2="20" y2="6"></line>
             <line x1="4" y1="12" x2="20" y2="12"></line>
             <line x1="4" y1="18" x2="20" y2="18"></line>
@@ -51,7 +54,7 @@ function Header({ mostrarBusca = true }) {
         </div>
       )}
 
-      <SideMenu aberto={menuAberto} onFechar={() => setMenuAberto(false)} />
+      <SideMenu id="menu-principal" aberto={menuAberto} onFechar={fecharMenu} />
     </header>
   )
 }

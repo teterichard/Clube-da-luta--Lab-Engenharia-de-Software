@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './style.css';
 
-function SearchBar({ onSearch, placeholder = "Buscar eventos, categorias..." }) {
+function SearchBar({ onSearch, placeholder = "Buscar por local (ex.: Ibirapuera)" }) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleSubmit = (e) => {
@@ -12,8 +12,9 @@ function SearchBar({ onSearch, placeholder = "Buscar eventos, categorias..." }) 
   };
 
   return (
-    <form className="search-bar-container" onSubmit={handleSubmit}>
-      <svg 
+    <form className="search-bar-container" onSubmit={handleSubmit} role="search">
+      <svg
+        aria-hidden="true"
         className="search-icon" 
         xmlns="http://www.w3.org/2000/svg" 
         viewBox="0 0 24 24" 
@@ -28,8 +29,10 @@ function SearchBar({ onSearch, placeholder = "Buscar eventos, categorias..." }) 
       </svg>
 
       {/* Input sem bordas próprias */}
+      <label htmlFor="busca-topo" className="sr-only">Buscar atividades por local</label>
       <input
-        type="text"
+        id="busca-topo"
+        type="search"
         className="search-input"
         placeholder={placeholder}
         value={searchTerm}
