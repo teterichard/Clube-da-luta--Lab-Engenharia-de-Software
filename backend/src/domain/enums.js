@@ -23,4 +23,11 @@ const StatusParticipacao = Object.freeze({
   REJEITADO: 'REJEITADO',
 });
 
-module.exports = { StatusAtividade, Visibilidade, Nivel, StatusParticipacao };
+/** Convite do organizador para uma pessoa específica (RF07 — entidade Convite do diagrama). */
+const StatusConvite = Object.freeze({
+  PENDENTE: 'PENDENTE',
+  ACEITO: 'ACEITO',
+  RECUSADO: 'RECUSADO',
+});
+
+module.exports = { StatusAtividade, Visibilidade, Nivel, StatusParticipacao, StatusConvite };
