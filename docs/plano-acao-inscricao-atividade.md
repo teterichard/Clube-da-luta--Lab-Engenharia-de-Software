@@ -88,4 +88,5 @@ Rodar: `cd backend && npm test`.
 ## 6. Pendências para o grupo decidir
 
 - **P5 — Reinscrição após recusa:** hoje o usuário recusado pode pedir de novo (igual ao código Java). Manter?
-- **P6 — Cancelar inscrição:** o participante pode desistir de uma solicitação/participação aceita? (não está no documento)
+- **P6 — Cancelar inscrição:** implementado como `POST /api/participacoes/:id/cancelar` (status `CANCELADO`, devolve a vaga
+  e permite pedir de novo). Confirmar com o grupo se o comportamento está ok.

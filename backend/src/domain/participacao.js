@@ -15,6 +15,11 @@ function calcularVagas(atividade, participacoes) {
   return Math.max(atividade.numeroIntegrantes - aceitas, 0);
 }
 
+/** Pendente ou aceita: conta como solicitação em andamento (RI06). */
+function ehAtiva(participacao) {
+  return participacao.status === StatusParticipacao.PENDENTE || participacao.status === StatusParticipacao.ACEITO;
+}
+
 function ehOrganizador(atividade, usuario) {
   return !!usuario && mesmoId(atividade.organizadorId, usuario.id);
 }
@@ -22,7 +27,8 @@ function ehOrganizador(atividade, usuario) {
 /**
  * Passo 6 do fluxo básico — usuário solicita participação.
  * RI01 atividade AGENDADA · RI02 atividade ainda não começou · RI03 organizador não se inscreve
- * RI04 privada só por convite · RI05 precisa haver vaga (CT-04) · RI06 sem duplicidade (CT-06)
+ * RI04 privada só por convite · RI05 precisa haver vaga (CT-04)
+ * RI06 sem duplicidade (CT-06) — depois de recusado ou de cancelar, pode pedir de novo
  */
 function solicitarParticipacao(atividade, participacoes, usuario, agora = new Date()) {
   if (atividade.status !== StatusAtividade.AGENDADA) {
@@ -41,7 +47,7 @@ function solicitarParticipacao(atividade, participacoes, usuario, agora = new Da
     throw new ErroRegraNegocio('Atividade sem vagas');
   }
   const jaSolicitou = participacoes.some(
-    (p) => mesmoId(p.usuarioId, usuario.id) && p.status !== StatusParticipacao.REJEITADO,
+    (p) => mesmoId(p.usuarioId, usuario.id) && ehAtiva(p),
   );
   if (jaSolicitou) {
     throw new ErroRegraNegocio('Solicitação já enviada');
@@ -84,8 +90,27 @@ function responderSolicitacao(atividade, participacao, participacoes, usuario, d
   };
 }
 
+/**
+ * RI10 — o participante desiste (pendência P6). Vale para solicitações pendentes ou aceitas,
+ * enquanto a atividade está agendada. Cancelar uma aceita devolve a vaga.
+ */
+function cancelarParticipacao(atividade, participacao, usuario, agora = new Date()) {
+  if (!usuario || !mesmoId(participacao.usuarioId, usuario.id)) {
+    throw new ErroProibido('Somente o próprio participante pode cancelar a inscrição');
+  }
+  if (!ehAtiva(participacao)) {
+    throw new ErroRegraNegocio('Esta inscrição já foi encerrada');
+  }
+  if (atividade.status !== StatusAtividade.AGENDADA) {
+    throw new ErroRegraNegocio('Só é possível cancelar a inscrição de uma atividade agendada');
+  }
+  return { ...participacao, status: StatusParticipacao.CANCELADO, canceladaEm: agora };
+}
+
 module.exports = {
   calcularVagas,
+  ehAtiva,
+  cancelarParticipacao,
   ehOrganizador,
   solicitarParticipacao,
   responderSolicitacao,

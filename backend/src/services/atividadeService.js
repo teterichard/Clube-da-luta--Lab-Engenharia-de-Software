@@ -66,6 +66,19 @@ function criarAtividadeService({
       return comVagas(atividade);
     },
 
+    /** Atividades que o usuário organiza (todas), com vagas e quantas solicitações aguardam resposta. */
+    async listarOrganizadas(usuario) {
+      const atividades = await atividadeRepository.listarPorOrganizador(usuario.id);
+      return Promise.all(atividades.map(async (a) => {
+        const participacoes = await participacaoRepository.listarPorAtividade(a.id);
+        return {
+          ...a,
+          vagas: calcularVagas(a, participacoes),
+          pendentes: participacoes.filter((p) => p.status === StatusParticipacao.PENDENTE).length,
+        };
+      }));
+    },
+
     /** RF04 — organizador edita a atividade enquanto ela está agendada. */
     async editar(id, dados, usuario) {
       const atual = await carregar(id);

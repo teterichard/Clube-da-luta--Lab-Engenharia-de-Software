@@ -18,6 +18,10 @@ function criarAtividadeController(atividadeService) {
       res.json(await atividadeService.listar(req.query));
     }),
 
+    listarOrganizadas: tratar(async (req, res) => {
+      res.json(await atividadeService.listarOrganizadas(req.usuario));
+    }),
+
     detalhar: tratar(async (req, res) => {
       res.json(await atividadeService.detalhar(req.params.id, req.usuario));
     }),

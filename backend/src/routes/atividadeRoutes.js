@@ -7,6 +7,7 @@ function atividadeRoutes({ controller, participacaoController, conviteController
 
   router.post('/', controller.criar);
   router.get('/', controller.listar);
+  router.get('/organizadas', controller.listarOrganizadas); // antes de /:id
   router.get('/:id', controller.detalhar);
   router.patch('/:id', controller.editar);
   router.delete('/:id', controller.excluir);

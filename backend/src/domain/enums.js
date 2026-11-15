@@ -21,6 +21,7 @@ const StatusParticipacao = Object.freeze({
   PENDENTE: 'PENDENTE',
   ACEITO: 'ACEITO',
   REJEITADO: 'REJEITADO',
+  CANCELADO: 'CANCELADO', // o próprio participante desistiu (pendência P6)
 });
 
 /** Convite do organizador para uma pessoa específica (RF07 — entidade Convite do diagrama). */

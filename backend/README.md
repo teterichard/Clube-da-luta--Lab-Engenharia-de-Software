@@ -27,6 +27,7 @@ Todas exigem `Authorization: Bearer <jwt>` (o token vem do cadastro ou do login)
 | `PATCH` | `/api/usuarios/me` | Edita `nome`, `localizacao`, `idade`, `proficiencia` |
 | `POST` | `/api/atividades` | Cria atividade (organizador = usuário do token) |
 | `GET` | `/api/atividades` | Lista atividades públicas e agendadas, com `vagas`. Filtros: `tipo`, `nivel`, `publicoAlvo`, `local` (parcial), `data` (AAAA-MM-DD), `comVaga=true` |
+| `GET` | `/api/atividades/organizadas` | Atividades que eu organizo (todas), com `vagas` e `pendentes` |
 | `GET` | `/api/atividades/:id` | Detalhes da atividade + vagas restantes |
 | `PATCH` | `/api/atividades/:id` | Organizador edita (só `AGENDADA`; não reduz abaixo dos aceitos) |
 | `DELETE` | `/api/atividades/:id` | Organizador exclui (só se ninguém foi aceito — senão, cancele) |
@@ -40,6 +41,8 @@ Todas exigem `Authorization: Bearer <jwt>` (o token vem do cadastro ou do login)
 | `GET` | `/api/convites` | Convites recebidos pelo usuário logado (`?status=PENDENTE`) |
 | `PATCH` | `/api/convites/:id` | Convidado responde `{ "decisao": "ACEITAR" }` ou `RECUSAR`; aceitar confirma a presença |
 | `PATCH` | `/api/participacoes/:id` | Organizador responde: `{ "decisao": "ACEITAR" }` ou `{ "decisao": "RECUSAR" }` |
+| `GET` | `/api/participacoes/minhas` | Minhas inscrições, com resumo de cada atividade |
+| `POST` | `/api/participacoes/:id/cancelar` | Participante desiste (pendente ou aceita; devolve a vaga) |
 
 Erros: `400` dados inválidos · `401` sem login · `403` sem permissão · `404` não encontrado · `409` regra de negócio (sem vagas, duplicidade, já respondida).
 
