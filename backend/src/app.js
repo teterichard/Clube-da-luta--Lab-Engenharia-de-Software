@@ -18,6 +18,7 @@ const { criarConviteService } = require('./services/conviteService');
 const { criarConviteController } = require('./controllers/conviteController');
 const { conviteRoutes } = require('./routes/conviteRoutes');
 const { criarTravaMemoria } = require('./repositories/travaMemoria');
+const { criarPublicador } = require('./domain/eventos');
 
 /**
  * Monta a aplicação Express sem subir o servidor (facilita testes com Supertest).
@@ -29,6 +30,7 @@ function criarApp({
   usuarioRepository = criarUsuarioRepositoryMemoria(),
   conviteRepository = criarConviteRepositoryMemoria(),
   comTrava,
+  eventos = criarPublicador(),
   jwtSegredo,
   jwtExpiracao,
   custoBcrypt,
@@ -42,6 +44,7 @@ function criarApp({
     ...repositorios,
     usuarioRepository,
     comTrava: comTrava || criarTravaMemoria(repositorios),
+    eventos,
     relogio,
   };
   const controller = criarAtividadeController(criarAtividadeService(deps));
