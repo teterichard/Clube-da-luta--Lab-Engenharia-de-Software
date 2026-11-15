@@ -127,6 +127,19 @@ describeMySQL('Integração com MySQL', () => {
     expect((await request(app).get(`/api/atividades/${a.id}`).set(org.auth)).body.vagas).toBe(2);
   });
 
+  test('notificações gravadas pelos eventos e marcadas como lidas', async () => {
+    const { body: a } = await request(app).post('/api/atividades').set(org.auth).send(atividade());
+    await request(app).post(`/api/atividades/${a.id}/participacoes`).set(carla.auth);
+
+    const lista = await request(app).get('/api/notificacoes?naoLidas=true').set(org.auth);
+    const aviso = lista.body.itens.find((n) => n.atividadeId === a.id);
+    expect(aviso).toMatchObject({ tipo: 'SOLICITACAO_RECEBIDA', lida: false, mensagem: `Carla pediu para participar de "${a.titulo}"` });
+
+    expect((await request(app).patch(`/api/notificacoes/${aviso.id}/lida`).set(org.auth)).body.lida).toBe(true);
+    await request(app).post('/api/notificacoes/lidas').set(org.auth);
+    expect((await request(app).get('/api/notificacoes').set(org.auth)).body.naoLidas).toBe(0);
+  });
+
   test('ciclo de status e exclusão em cascata', async () => {
     const { body: a } = await request(app).post('/api/atividades').set(org.auth).send(atividade());
     expect((await request(app).post(`/api/atividades/${a.id}/iniciar`).set(org.auth)).body.status).toBe('ATIVA');

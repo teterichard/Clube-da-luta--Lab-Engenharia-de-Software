@@ -3,6 +3,7 @@ const { ehOrganizador } = require('../domain/atividade');
 const { normalizarEmail } = require('../domain/usuario');
 const { StatusConvite, StatusParticipacao } = require('../domain/enums');
 const { ErroNaoEncontrado, ErroProibido, ErroValidacao } = require('../domain/erros');
+const { Eventos } = require('../domain/eventos');
 
 const mesmoId = (a, b) => String(a) === String(b);
 
@@ -13,6 +14,7 @@ function criarConviteService({
   usuarioRepository,
   conviteRepository,
   comTrava,
+  eventos,
   relogio = () => new Date(),
 }) {
   async function carregarAtividade(id) {
@@ -63,6 +65,7 @@ function criarConviteService({
       ]);
       const novo = criarConvite(atividade, usuario, convidado, convites, participacoes, relogio());
       const [salvo] = await comConvidados([await conviteRepository.salvar(novo)]);
+      await eventos.publicar(Eventos.CONVITE_CRIADO, { atividade, convite: salvo });
       return salvo;
     },
 
@@ -113,7 +116,7 @@ function criarConviteService({
       await carregarAtividade(encontrado.atividadeId);
 
       // aceitar ocupa vaga: mesma trava por atividade usada no aceite de solicitações
-      return comTrava(encontrado.atividadeId, async (repos) => {
+      const { atividade, convite } = await comTrava(encontrado.atividadeId, async (repos) => {
         const convite = await repos.conviteRepository.buscarPorId(conviteId);
         const atividade = await repos.atividadeRepository.buscarPorId(convite.atividadeId);
         const participacoes = await repos.participacaoRepository.listarPorAtividade(atividade.id);
@@ -124,8 +127,10 @@ function criarConviteService({
         if (salvo.status === StatusConvite.ACEITO) {
           await confirmarPresenca(repos.participacaoRepository, atividade, participacoes, usuario.id, agora);
         }
-        return salvo;
+        return { atividade, convite: salvo };
       });
+      await eventos.publicar(Eventos.CONVITE_RESPONDIDO, { atividade, convite });
+      return convite;
     },
   };
 }

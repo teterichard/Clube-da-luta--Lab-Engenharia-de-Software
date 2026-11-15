@@ -9,12 +9,17 @@ const { calcularVagas, ehOrganizador } = require('../domain/participacao');
 const { podeVerPorConvite } = require('../domain/convite');
 const { Visibilidade, StatusParticipacao } = require('../domain/enums');
 const { ErroNaoAutenticado, ErroNaoEncontrado } = require('../domain/erros');
+const { Eventos } = require('../domain/eventos');
+
+/** Campos que, se mudarem, valem um aviso para quem vai participar. */
+const CAMPOS_AVISADOS = ['dataHora', 'local', 'titulo'];
 
 /** Casos de uso de Atividade. Recebe os repositórios por injeção de dependência. */
 function criarAtividadeService({
   atividadeRepository,
   participacaoRepository,
   conviteRepository,
+  eventos,
   relogio = () => new Date(),
 }) {
   async function carregar(id) {
@@ -83,14 +88,30 @@ function criarAtividadeService({
     async editar(id, dados, usuario) {
       const atual = await carregar(id);
       const editada = editarAtividade(atual, dados, usuario, await contarAceitos(atual.id), relogio());
-      return comVagas(await atividadeRepository.atualizar(editada));
+      const salva = await atividadeRepository.atualizar(editada);
+      const mudou = CAMPOS_AVISADOS.filter((c) => String(atual[c]) !== String(salva[c]));
+      if (mudou.length > 0) {
+        await eventos.publicar(Eventos.ATIVIDADE_EDITADA, {
+          atividade: salva,
+          campos: mudou,
+          participacoes: await participacaoRepository.listarPorAtividade(salva.id),
+        });
+      }
+      return comVagas(salva);
     },
 
     /** RF11 — iniciar, cancelar ou concluir. */
     async mudarStatus(id, acao, usuario) {
       const atual = await carregar(id);
       const alterada = mudarStatus(atual, usuario, acao, relogio());
-      return comVagas(await atividadeRepository.atualizar(alterada));
+      const salva = await atividadeRepository.atualizar(alterada);
+      if (acao === 'cancelar') {
+        await eventos.publicar(Eventos.ATIVIDADE_CANCELADA, {
+          atividade: salva,
+          participacoes: await participacaoRepository.listarPorAtividade(salva.id),
+        });
+      }
+      return comVagas(salva);
     },
 
     /** RF04 — excluir (só sem participantes aceitos; com eles, o organizador cancela). */

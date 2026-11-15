@@ -5,6 +5,7 @@ const {
   ehOrganizador,
 } = require('../domain/participacao');
 const { ErroNaoEncontrado, ErroProibido } = require('../domain/erros');
+const { Eventos } = require('../domain/eventos');
 
 /**
  * Caso de uso principal — "Inscrever-se em atividade" (passos 6 e 7, fluxos alternativos 2 e 3).
@@ -15,6 +16,7 @@ function criarParticipacaoService({
   participacaoRepository,
   usuarioRepository,
   comTrava,
+  eventos,
   relogio = () => new Date(),
 }) {
   async function carregarAtividade(id, repo = atividadeRepository) {
@@ -37,8 +39,15 @@ function criarParticipacaoService({
     await carregarAtividade(atividadeId); // 404 antes de abrir a trava
     return comTrava(atividadeId, async (repos) => {
       const atividade = await carregarAtividade(atividadeId, repos.atividadeRepository);
-      return fn(atividade, repos);
+      return { atividade, participacao: await fn(atividade, repos) };
     });
+  }
+
+  /** Executa na trava e, depois de gravar, avisa os observadores (notificações). */
+  async function executarEPublicar(atividadeId, evento, fn) {
+    const { atividade, participacao } = await naAtividade(atividadeId, fn);
+    await eventos.publicar(evento, { atividade, participacao });
+    return participacao;
   }
 
   /** Acrescenta { usuario: { id, nome } } para o organizador saber quem pediu. */
@@ -51,7 +60,7 @@ function criarParticipacaoService({
   return {
     /** Passo 6 — participante clica em "Solicitar participação" (CT-01, CT-04, CT-06). */
     async solicitar(atividadeId, usuario) {
-      return naAtividade(atividadeId, async (atividade, repos) => {
+      return executarEPublicar(atividadeId, Eventos.PARTICIPACAO_SOLICITADA, async (atividade, repos) => {
         const participacoes = await repos.participacaoRepository.listarPorAtividade(atividade.id);
         const nova = solicitarParticipacao(atividade, participacoes, usuario, relogio());
         return repos.participacaoRepository.salvar(nova);
@@ -96,7 +105,7 @@ function criarParticipacaoService({
     /** P6 — participante desiste da solicitação ou da vaga confirmada. */
     async cancelar(participacaoId, usuario) {
       const { atividadeId } = await carregarParticipacao(participacaoId);
-      return naAtividade(atividadeId, async (atividade, repos) => {
+      return executarEPublicar(atividadeId, Eventos.PARTICIPACAO_CANCELADA, async (atividade, repos) => {
         const participacao = await carregarParticipacao(participacaoId, repos.participacaoRepository);
         const cancelada = cancelarParticipacao(atividade, participacao, usuario, relogio());
         return repos.participacaoRepository.atualizar(cancelada);
@@ -106,7 +115,7 @@ function criarParticipacaoService({
     /** Passo 7 — organizador aceita (CT-01) ou recusa (CT-05). */
     async responder(participacaoId, usuario, decisao) {
       const { atividadeId } = await carregarParticipacao(participacaoId);
-      return naAtividade(atividadeId, async (atividade, repos) => {
+      return executarEPublicar(atividadeId, Eventos.PARTICIPACAO_RESPONDIDA, async (atividade, repos) => {
         // relê dentro da trava: outra requisição pode ter respondido ou ocupado a vaga
         const participacao = await carregarParticipacao(participacaoId, repos.participacaoRepository);
         const participacoes = await repos.participacaoRepository.listarPorAtividade(atividade.id);
