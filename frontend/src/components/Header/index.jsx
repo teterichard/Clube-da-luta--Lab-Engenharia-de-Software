@@ -4,6 +4,7 @@ import './style.css'
 
 import SearchBar from '../SearchBar'
 import SideMenu from '../SideMenu'
+import SinoNotificacoes from '../SinoNotificacoes'
 import { useAuth } from '../../contexts/AuthContext'
 
 // Cabeçalho usado em todas as telas: menu, nome do app, perfil e barra de busca
@@ -31,14 +32,17 @@ function Header({ mostrarBusca = true }) {
 
         <Link to="/" className="firstName">Topa-aí</Link>
 
-        <Link to={usuario ? '/perfil' : '/entrar'} className="icon-btn"
-          aria-label={usuario ? `Perfil de ${usuario.nome}` : 'Entrar'}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-        </Link>
+        <div className="topo-acoes">
+          {usuario && <SinoNotificacoes />}
+          <Link to={usuario ? '/perfil' : '/entrar'} className="icon-btn"
+            aria-label={usuario ? `Perfil de ${usuario.nome}` : 'Entrar'}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </Link>
+        </div>
       </div>
 
       {mostrarBusca && usuario && (
