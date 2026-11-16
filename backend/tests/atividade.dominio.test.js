@@ -79,3 +79,77 @@ describe('Domínio — criarAtividade (UC 5.2)', () => {
     ));
   });
 });
+
+describe('Editar atividade (RF04)', () => {
+  const { editarAtividade } = require('../src/domain/atividade');
+  const { ErroProibido, ErroRegraNegocio } = require('../src/domain/erros');
+  const atual = () => ({ id: 7, ...criarAtividade(dadosValidos(), organizador, AGORA) });
+
+  test('altera só os campos enviados e marca atualizadaEm', () => {
+    const editada = editarAtividade(atual(), { titulo: 'Basquete 3x3', numeroIntegrantes: 6 }, organizador, 0, AGORA);
+    expect(editada).toMatchObject({ id: 7, titulo: 'Basquete 3x3', numeroIntegrantes: 6, local: 'Parque Ibirapuera - quadra 3' });
+    expect(editada.atualizadaEm).toBe(AGORA);
+  });
+
+  test('ignora status e organizadorId vindos do cliente', () => {
+    const editada = editarAtividade(atual(), { status: 'CONCLUIDA', organizadorId: 99 }, organizador, 0, AGORA);
+    expect(editada.status).toBe('AGENDADA');
+    expect(editada.organizadorId).toBe(1);
+  });
+
+  test('só o organizador edita', () => {
+    expect(() => editarAtividade(atual(), { titulo: 'Outro' }, { id: 2 }, 0, AGORA)).toThrow(ErroProibido);
+  });
+
+  test('só edita atividade agendada', () => {
+    expect(() => editarAtividade({ ...atual(), status: 'CANCELADA' }, {}, organizador, 0, AGORA))
+      .toThrow(ErroRegraNegocio);
+  });
+
+  test('não deixa o número de integrantes abaixo dos aceitos', () => {
+    expect(camposComErro(() => editarAtividade(atual(), { numeroIntegrantes: 3 }, organizador, 4, AGORA)))
+      .toEqual(['numeroIntegrantes']);
+  });
+
+  test('nova data precisa ser no futuro, mas manter a data atual não é revalidado', () => {
+    expect(camposComErro(() => editarAtividade(atual(), { dataHora: '2026-01-01T10:00:00-03:00' }, organizador, 0, AGORA)))
+      .toEqual(['dataHora']);
+    const depois = new Date('2026-12-01T12:00:00-03:00');
+    expect(() => editarAtividade(atual(), { titulo: 'Novo título' }, organizador, 0, depois)).not.toThrow();
+  });
+});
+
+describe('Ciclo de status (RF11) e exclusão', () => {
+  const { mudarStatus, verificarExclusao } = require('../src/domain/atividade');
+  const { ErroProibido, ErroRegraNegocio } = require('../src/domain/erros');
+  const nova = () => ({ id: 1, ...criarAtividade(dadosValidos(), organizador, AGORA) });
+
+  test('agendada → ativa → concluída', () => {
+    const ativa = mudarStatus(nova(), organizador, 'iniciar', AGORA);
+    expect(ativa.status).toBe('ATIVA');
+    expect(mudarStatus(ativa, organizador, 'concluir', AGORA).status).toBe('CONCLUIDA');
+  });
+
+  test('cancelar vale para agendada e ativa, não para concluída ou cancelada', () => {
+    expect(mudarStatus(nova(), organizador, 'cancelar', AGORA).status).toBe('CANCELADA');
+    expect(mudarStatus({ ...nova(), status: 'ATIVA' }, organizador, 'cancelar', AGORA).status).toBe('CANCELADA');
+    expect(() => mudarStatus({ ...nova(), status: 'CONCLUIDA' }, organizador, 'cancelar', AGORA)).toThrow(ErroRegraNegocio);
+    expect(() => mudarStatus({ ...nova(), status: 'CANCELADA' }, organizador, 'cancelar', AGORA)).toThrow(ErroRegraNegocio);
+  });
+
+  test('não conclui atividade que não começou e não inicia duas vezes', () => {
+    expect(() => mudarStatus(nova(), organizador, 'concluir', AGORA)).toThrow(ErroRegraNegocio);
+    expect(() => mudarStatus({ ...nova(), status: 'ATIVA' }, organizador, 'iniciar', AGORA)).toThrow(ErroRegraNegocio);
+  });
+
+  test('ação desconhecida é 400 e outro usuário é 403', () => {
+    expect(() => mudarStatus(nova(), organizador, 'pausar', AGORA)).toThrow(ErroValidacao);
+    expect(() => mudarStatus(nova(), { id: 2 }, 'iniciar', AGORA)).toThrow(ErroProibido);
+  });
+
+  test('exclusão só sem participantes aceitos', () => {
+    expect(() => verificarExclusao(nova(), organizador, 0)).not.toThrow();
+    expect(() => verificarExclusao(nova(), organizador, 1)).toThrow(ErroRegraNegocio);
+    expect(() => verificarExclusao(nova(), { id: 3 }, 0)).toThrow(ErroProibido);
+  });
+});

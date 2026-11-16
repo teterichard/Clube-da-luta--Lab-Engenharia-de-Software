@@ -21,6 +21,33 @@ const StatusParticipacao = Object.freeze({
   PENDENTE: 'PENDENTE',
   ACEITO: 'ACEITO',
   REJEITADO: 'REJEITADO',
+  CANCELADO: 'CANCELADO', // o próprio participante desistiu (pendência P6)
 });
 
-module.exports = { StatusAtividade, Visibilidade, Nivel, StatusParticipacao };
+/** Convite do organizador para uma pessoa específica (RF07 — entidade Convite do diagrama). */
+const StatusConvite = Object.freeze({
+  PENDENTE: 'PENDENTE',
+  ACEITO: 'ACEITO',
+  RECUSADO: 'RECUSADO',
+});
+
+/** Comunidades (classe Comunidade do protótipo Java): papel e situação de cada membro. */
+const PapelMembro = Object.freeze({
+  ADMIN: 'ADMIN',
+  MEMBRO: 'MEMBRO',
+});
+
+const StatusMembro = Object.freeze({
+  ATIVO: 'ATIVO',
+  PENDENTE: 'PENDENTE', // pediu para entrar numa comunidade privada
+});
+
+module.exports = {
+  StatusAtividade,
+  Visibilidade,
+  Nivel,
+  StatusParticipacao,
+  StatusConvite,
+  PapelMembro,
+  StatusMembro,
+};

@@ -78,14 +78,15 @@ Rodar: `cd backend && npm test`.
 
 ## 5. Próximas etapas
 
-1. **Notificação (padrão Observer):** avisar o participante quando a solicitação for aceita/recusada (CT-05).
-2. **Convites (RF07):** liberar a inscrição em atividades privadas via `Convite`.
-3. **UC Autenticação:** cadastro/login com bcrypt e emissão do JWT.
-4. **Concorrência no MySQL:** ao aceitar, travar a atividade (`SELECT ... FOR UPDATE` em transação) para que dois
-   aceites simultâneos não ultrapassem o número de integrantes.
-5. **Front-end:** telas de lista com filtros, detalhes e "Solicitar participação".
+1. ~~**Notificação (padrão Observer)**~~ — feito: `domain/eventos.js` publica, `notificacaoService` assina e grava.
+2. ~~**Convites (RF07)**~~ — feito: `POST /api/atividades/:id/convites`, `PATCH /api/convites/:id`.
+3. ~~**UC Autenticação**~~ — feito: `POST /api/auth/cadastro` e `/login` com bcrypt.
+4. ~~**Concorrência no MySQL**~~ — feito: `repositories/travaMySQL.js` (`SELECT ... FOR UPDATE` em transação),
+   validado em `tests/integracao/mysql.test.js`.
+5. ~~**Front-end**~~ — feito: telas de lista com filtros, detalhes, solicitações, convites e notificações.
 
 ## 6. Pendências para o grupo decidir
 
 - **P5 — Reinscrição após recusa:** hoje o usuário recusado pode pedir de novo (igual ao código Java). Manter?
-- **P6 — Cancelar inscrição:** o participante pode desistir de uma solicitação/participação aceita? (não está no documento)
+- **P6 — Cancelar inscrição:** implementado como `POST /api/participacoes/:id/cancelar` (status `CANCELADO`, devolve a vaga
+  e permite pedir de novo). Confirmar com o grupo se o comportamento está ok.

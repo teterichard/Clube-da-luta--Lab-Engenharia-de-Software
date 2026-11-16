@@ -19,9 +19,20 @@ function criarParticipacaoRepositoryMemoria() {
       const p = participacoes.get(Number(id));
       return p ? { ...p } : null;
     },
+    async removerPorAtividade(atividadeId) {
+      [...participacoes.values()]
+        .filter((p) => String(p.atividadeId) === String(atividadeId))
+        .forEach((p) => participacoes.delete(p.id));
+    },
     async listarPorAtividade(atividadeId) {
       return [...participacoes.values()]
         .filter((p) => String(p.atividadeId) === String(atividadeId))
+        .map((p) => ({ ...p }));
+    },
+    async listarPorUsuario(usuarioId) {
+      return [...participacoes.values()]
+        .filter((p) => String(p.usuarioId) === String(usuarioId))
+        .sort((a, b) => new Date(b.solicitadaEm) - new Date(a.solicitadaEm))
         .map((p) => ({ ...p }));
     },
     /** Map atividadeId → quantidade de participações ACEITAS (para calcular vagas na listagem). */

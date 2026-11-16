@@ -2,20 +2,17 @@ import { useEffect, useState } from 'react'
 
 import Aviso from '../../components/Aviso'
 import { listarSolicitacoes, responderSolicitacao } from '../../services/api'
-
-const STATUS = {
-  PENDENTE: { texto: 'Pendente', classe: 'tag_amarela' },
-  ACEITO: { texto: 'Aceito', classe: 'tag_verde' },
-  REJEITADO: { texto: 'Recusado', classe: 'tag_vermelha' },
-}
+import Tag from '../../components/Tag'
+import { STATUS_SOLICITACAO } from '../../utils/status'
 
 // Passo 7 do UC "Inscrever-se em atividade": organizador aceita ou recusa (CT-01 / CT-05)
-function Solicitacoes({ atividadeId, onAtualizar }) {
+function Solicitacoes({ atividade, onAtualizar }) {
   const [lista, setLista] = useState([])
   const [erro, setErro] = useState('')
+  const [respondendo, setRespondendo] = useState(null)
 
   function carregar() {
-    listarSolicitacoes(atividadeId)
+    listarSolicitacoes(atividade.id)
       .then(setLista)
       .catch((e) => setErro(e.message))
   }
@@ -23,49 +20,59 @@ function Solicitacoes({ atividadeId, onAtualizar }) {
   useEffect(() => {
     carregar()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [atividadeId])
+  }, [atividade.id, atividade.vagas])
 
   async function responder(id, decisao) {
     setErro('')
+    setRespondendo(id)
     try {
       await responderSolicitacao(id, decisao)
       carregar()
       onAtualizar() // atualiza as vagas lá em cima
     } catch (e) {
       setErro(e.message)
+    } finally {
+      setRespondendo(null)
     }
   }
 
   const pendentes = lista.filter((s) => s.status === 'PENDENTE').length
+  const podeResponder = atividade.status === 'AGENDADA'
 
   return (
-    <section className="painel">
-      <h3 className="secao-titulo">
-        Solicitações {pendentes > 0 && <span className="contador">{pendentes}</span>}
-      </h3>
+    <section className="painel" aria-labelledby="titulo-solicitacoes">
+      <h2 id="titulo-solicitacoes" className="secao-titulo">
+        Participantes e solicitações
+        {pendentes > 0 && <span className="contador" aria-label={`${pendentes} pendentes`}>{pendentes}</span>}
+      </h2>
       <Aviso tipo="erro">{erro}</Aviso>
 
       {lista.length === 0 && <p className="vazio">Ninguém pediu para participar ainda.</p>}
 
       <ul className="solicitacoes">
-        {lista.map((s) => (
-          <li key={s.id} className="solicitacao">
-            <div className="avatar">{String(s.usuarioId).slice(0, 2)}</div>
-            <div className="solicitacao-info">
-              <strong>Usuário #{s.usuarioId}</strong>
-              <span>pediu em {new Date(s.solicitadaEm).toLocaleDateString('pt-BR')}</span>
-            </div>
-
-            {s.status === 'PENDENTE' ? (
-              <div className="solicitacao-acoes">
-                <button className="btn btn_pequeno btn_cinza" onClick={() => responder(s.id, 'RECUSAR')}>Recusar</button>
-                <button className="btn btn_pequeno" onClick={() => responder(s.id, 'ACEITAR')}>Aceitar</button>
+        {lista.map((s) => {
+          const nome = s.usuario?.nome || `Usuário #${s.usuarioId}`
+          return (
+            <li key={s.id} className="solicitacao">
+              <div className="avatar" aria-hidden="true">{nome.slice(0, 2).toUpperCase()}</div>
+              <div className="solicitacao-info">
+                <strong>{nome}</strong>
+                <span>pediu em {new Date(s.solicitadaEm).toLocaleDateString('pt-BR')}</span>
               </div>
-            ) : (
-              <span className={`tag ${STATUS[s.status].classe}`}>{STATUS[s.status].texto}</span>
-            )}
-          </li>
-        ))}
+
+              {s.status === 'PENDENTE' && podeResponder ? (
+                <div className="solicitacao-acoes">
+                  <button className="btn btn_pequeno btn_cinza" onClick={() => responder(s.id, 'RECUSAR')}
+                    disabled={respondendo === s.id} aria-label={`Recusar ${nome}`}>Recusar</button>
+                  <button className="btn btn_pequeno" onClick={() => responder(s.id, 'ACEITAR')}
+                    disabled={respondendo === s.id || atividade.vagas === 0} aria-label={`Aceitar ${nome}`}>Aceitar</button>
+                </div>
+              ) : (
+                <Tag mapa={STATUS_SOLICITACAO} status={s.status} />
+              )}
+            </li>
+          )
+        })}
       </ul>
     </section>
   )

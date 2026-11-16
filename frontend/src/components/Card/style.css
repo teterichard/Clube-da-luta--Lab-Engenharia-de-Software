@@ -49,11 +49,11 @@
 }
 
 .card-btn_focused {
-  background-color: #6366f1; 
+  background-color: #4f46e5;
 }
 
 .card-btn_focused:hover {
-  background-color: #4f46e5; 
+  background-color: #4338ca;
 }
 
 .card-img {
@@ -69,7 +69,7 @@
   text-align: start;
   font-size: 11px;
   font-weight: 600;
-  color: #6366f1;
+  color: #4f46e5;
 }
 
 .card-componente {
@@ -80,4 +80,8 @@
 
 .card-componente .card-text {
   flex: 1;
+}
+
+.card-selo {
+  margin-top: 6px;
 }

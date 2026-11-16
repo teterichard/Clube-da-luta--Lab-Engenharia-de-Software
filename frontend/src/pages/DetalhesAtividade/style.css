@@ -11,12 +11,6 @@
   border-radius: 15px;
 }
 
-.detalhe-desc {
-  font-size: 13px;
-  color: #363636;
-  line-height: 1.5;
-}
-
 .detalhe-infos {
   list-style: none;
   padding: 0;
@@ -70,23 +64,6 @@
 
 /* ---- Solicitações (organizador) ---- */
 
-.secao-titulo {
-  margin: 0 0 8px 0;
-  font-size: 15px;
-  color: var(--text-h);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.contador {
-  background: #6366f1;
-  color: #ffffff;
-  font-size: 11px;
-  border-radius: 999px;
-  padding: 1px 8px;
-}
-
 .solicitacoes {
   list-style: none;
   padding: 0;
@@ -138,4 +115,42 @@
 .solicitacao-acoes {
   display: flex;
   gap: 6px;
+}
+
+.minha-participacao {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.minha-situacao {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.convite-recebido {
+  background: rgba(99, 102, 241, 0.08);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+  color: #312e81;
+}
+
+.convite-form {
+  display: flex;
+  gap: 8px;
+}
+
+.convite-form input {
+  flex: 1;
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
 }

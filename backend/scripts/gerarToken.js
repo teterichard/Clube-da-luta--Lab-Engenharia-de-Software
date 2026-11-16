@@ -1,4 +1,4 @@
-// Gera um token JWT de teste enquanto o UC de login não existe.
+// Gera um token JWT de teste (atalho de desenvolvimento — o fluxo normal é POST /api/auth/login).
 // Uso: node scripts/gerarToken.js <id> <nome>
 //   ex.: node scripts/gerarToken.js 1 Organizador
 //        node scripts/gerarToken.js 2 Joao

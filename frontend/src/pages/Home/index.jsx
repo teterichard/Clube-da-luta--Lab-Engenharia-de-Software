@@ -1,79 +1,126 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import './style.css'
 
 import Card from '../../components/Card'
 import Carousel from '../../components/Carousel'
 import Aviso from '../../components/Aviso'
-import { listarAtividades } from '../../services/api'
+import Tag from '../../components/Tag'
+import {
+  listarAtividades,
+  listarAtividadesOrganizadas,
+  listarConvitesRecebidos,
+  listarMinhasInscricoes,
+} from '../../services/api'
 import { imagemDoTipo, formatarData } from '../../utils/atividade'
-import { MINHAS_INSCRICOES, SUGESTOES } from '../../data/exemplos'
+import { STATUS_PARTICIPACAO } from '../../utils/status'
 
-// Tela 1 (wireframe 4.1): inscrições do usuário + sugestões de eventos
+const EM_ANDAMENTO = ['AGENDADA', 'ATIVA']
+
+// Tela 1 (wireframe 4.1): inscrições do usuário, atividades que organiza e sugestões de eventos
 function Home() {
   const navigate = useNavigate()
-  const [sugestoes, setSugestoes] = useState([])
-  const [usandoExemplos, setUsandoExemplos] = useState(false)
+  const location = useLocation()
+  const [dados, setDados] = useState(null)
+  const [erro, setErro] = useState('')
 
   useEffect(() => {
-    listarAtividades({ comVaga: true })
-      .then((lista) => setSugestoes(lista))
-      .catch(() => {
-        // sem back-end (ou sem token): mostra os exemplos para a tela não ficar vazia
-        setSugestoes(SUGESTOES)
-        setUsandoExemplos(true)
+    Promise.all([
+      listarMinhasInscricoes(),
+      listarAtividadesOrganizadas(),
+      listarAtividades({ comVaga: true }),
+      listarConvitesRecebidos('PENDENTE'),
+    ])
+      .then(([inscricoes, organizadas, abertas, convites]) => {
+        const ativas = inscricoes.filter((p) => ['PENDENTE', 'ACEITO'].includes(p.status)
+          && EM_ANDAMENTO.includes(p.atividade.status))
+        const ocupadas = new Set([...ativas.map((p) => p.atividadeId), ...organizadas.map((a) => a.id)])
+        setDados({
+          inscricoes: ativas,
+          organizadas: organizadas.filter((a) => EM_ANDAMENTO.includes(a.status)),
+          sugestoes: abertas.filter((a) => !ocupadas.has(a.id)),
+          convites,
+        })
       })
+      .catch((e) => setErro(e.message))
   }, [])
 
-  function abrir(atividade) {
-    if (String(atividade.id).startsWith('ex')) return // exemplo não tem página
-    navigate(`/atividades/${atividade.id}`)
-  }
+  const abrir = (atividadeId) => navigate(`/atividades/${atividadeId}`)
 
   return (
-    <main className="contentBox">
+    <main id="conteudo" className="contentBox">
+      <h1 className="sr-only">Início</h1>
+      <Aviso tipo="sucesso">{location.state?.mensagem}</Aviso>
+
       <section className="subcontentBox">
         <Link to="/atividades/nova" className="home-criar">
           <span>
             <strong>Organize uma atividade</strong>
             <small>Chame a galera para jogar, correr ou dançar</small>
           </span>
-          <span className="home-criar-mais">+</span>
+          <span className="home-criar-mais" aria-hidden="true">+</span>
         </Link>
       </section>
 
-      <section className="subcontentBox">
-        <h3 className="contentTitle">Suas inscrições </h3>
-        <Carousel>
-          {MINHAS_INSCRICOES.map((a) => (
-            <Card key={a.id} titulo={a.titulo} asset={imagemDoTipo(a.tipo)} desc={a.descricao} btn_txt="Ver Detalhes" />
-          ))}
-        </Carousel>
-      </section>
+      <Aviso tipo="erro">{erro}</Aviso>
+      {!dados && !erro && <p className="vazio" role="status">Carregando...</p>}
 
-      <section className="subcontentBox">
-        <h3 className="contentTitle">Sugestão de novos eventos </h3>
-        {usandoExemplos && (
-          <Aviso tipo="info">Back-end offline ou sem login: mostrando eventos de exemplo.</Aviso>
-        )}
-        {!usandoExemplos && sugestoes.length === 0 && (
-          <p className="vazio">Nenhum evento com vagas por enquanto. Que tal criar um?</p>
-        )}
-        <Carousel>
-          {sugestoes.map((a) => (
-            <Card
-              key={a.id}
-              titulo={a.titulo}
-              asset={imagemDoTipo(a.tipo)}
-              desc={a.descricao || `${a.local}`}
-              info={a.dataHora ? `${formatarData(a.dataHora)} · ${a.vagas} vagas` : null}
-              btn_txt="Inscreva-se"
-              btn_type="focused"
-              onClick={() => abrir(a)}
-            />
-          ))}
-        </Carousel>
-      </section>
+      {dados && (
+        <>
+          {dados.convites.length > 0 && (
+            <Link to="/convites" className="home-aviso-convite">
+              Você tem {dados.convites.length} convite{dados.convites.length > 1 ? 's' : ''} esperando resposta →
+            </Link>
+          )}
+
+          <section className="subcontentBox">
+            <h2 id="titulo-inscricoes" className="contentTitle">Suas inscrições</h2>
+            {dados.inscricoes.length === 0 ? (
+              <p className="vazio">Você ainda não se inscreveu em nada. <Link to="/busca">Encontre uma atividade</Link></p>
+            ) : (
+              <Carousel rotulo="Suas inscrições">
+                {dados.inscricoes.map((p) => (
+                  <Card key={p.id} titulo={p.atividade.titulo} asset={imagemDoTipo(p.atividade.tipo)}
+                    selo={<Tag mapa={STATUS_PARTICIPACAO} status={p.status} />}
+                    info={`${formatarData(p.atividade.dataHora)} · ${p.atividade.local}`}
+                    btn_txt="Ver Detalhes" onClick={() => abrir(p.atividadeId)} />
+                ))}
+              </Carousel>
+            )}
+          </section>
+
+          {dados.organizadas.length > 0 && (
+            <section className="subcontentBox">
+              <h2 id="titulo-organizadas" className="contentTitle">Atividades que você organiza</h2>
+              <Carousel rotulo="Atividades que você organiza">
+                {dados.organizadas.map((a) => (
+                  <Card key={a.id} titulo={a.titulo} asset={imagemDoTipo(a.tipo)}
+                    selo={a.pendentes > 0
+                      ? <span className="tag tag_amarela">{a.pendentes} pedido{a.pendentes > 1 ? 's' : ''} para responder</span>
+                      : null}
+                    info={`${formatarData(a.dataHora)} · ${a.vagas} vagas`}
+                    btn_txt="Gerenciar" btn_type="focused" onClick={() => abrir(a.id)} />
+                ))}
+              </Carousel>
+            </section>
+          )}
+
+          <section className="subcontentBox">
+            <h2 id="titulo-sugestoes" className="contentTitle">Sugestão de novos eventos</h2>
+            {dados.sugestoes.length === 0 ? (
+              <p className="vazio">Nenhum evento com vagas por enquanto. Que tal criar um?</p>
+            ) : (
+              <Carousel rotulo="Sugestão de novos eventos">
+                {dados.sugestoes.map((a) => (
+                  <Card key={a.id} titulo={a.titulo} asset={imagemDoTipo(a.tipo)} desc={a.descricao || a.local}
+                    info={`${formatarData(a.dataHora)} · ${a.vagas} vagas`}
+                    btn_txt="Inscreva-se" btn_type="focused" onClick={() => abrir(a.id)} />
+                ))}
+              </Carousel>
+            )}
+          </section>
+        </>
+      )}
     </main>
   )
 }

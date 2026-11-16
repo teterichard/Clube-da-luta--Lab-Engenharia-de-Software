@@ -11,8 +11,21 @@ function criarAtividadeRepositoryMemoria() {
       atividades.set(salva.id, salva);
       return salva;
     },
+    async atualizar(atividade) {
+      atividades.set(atividade.id, { ...atividade });
+      return { ...atividade };
+    },
+    async remover(id) {
+      atividades.delete(Number(id));
+    },
     async buscarPorId(id) {
       return atividades.get(Number(id)) || null;
+    },
+    /** Todas as atividades criadas pelo usuário (qualquer status ou visibilidade), mais próximas primeiro. */
+    async listarPorOrganizador(organizadorId) {
+      return [...atividades.values()]
+        .filter((a) => String(a.organizadorId) === String(organizadorId))
+        .sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora));
     },
     /** Atividades que aparecem na busca: públicas, agendadas e futuras, ordenadas por data. */
     async listarAbertas(agora) {
