@@ -1,45 +1,60 @@
+/* ---- Identidade visual do Topa-aí ----
+   Mandarin (ação), Forest (marca), Crest (destaque). Textos sobre laranja usam --ink (contraste 4,7:1);
+   sobre verde, branco (7,9:1) ou Crest (6,4:1). */
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --mandarin: #FD550A;
+  --mandarin-escuro: #D9450A;
+  --forest: #015D47;
+  --forest-2: #0B6F56;
+  --forest-escuro: #01493A;
+  --crest: #E0F354;
+  --crest-suave: #F2F9C4;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --ink: #0F2A23;
+  --muted: #55635C;
+  --sage: #EEF2EA;
+  --sage-2: #E3EADF;
+  --line: #D7DED5;
+  --paper: #ffffff;
+
+  --erro: #B42318;
+  --erro-fundo: #FDECEA;
+  --ok: #015D47;
+  --ok-fundo: #DDF0E6;
+  --alerta-fundo: #FFE7D9;
+  --alerta: #8A2C02;
+
+  --text: var(--muted);
+  --text-h: var(--ink);
+  --border: var(--line);
+  --accent: var(--forest);
+  --shadow: 0 1px 0 rgba(15, 42, 35, 0.06), 0 8px 24px -12px rgba(15, 42, 35, 0.25);
+
+  --display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --sans: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif;
+  --heading: var(--display);
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
+  --raio: 18px;
+  --raio-p: 12px;
+
+  font: 16px/1.5 var(--sans);
   color: var(--text);
-  background: white;
+  background: var(--sage);
+  color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
 }
 
 body {
   margin: 0;
+  background: var(--sage);
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
+  width: 100%;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -47,76 +62,87 @@ body {
 }
 
 h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+h2,
+h3 {
+  font-family: var(--display);
+  color: var(--ink);
+  letter-spacing: -0.02em;
 }
 
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.05;
+  margin: 24px 0 8px;
 }
+
 h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.15;
   margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
 }
+
 p {
   margin: 0;
 }
 
-.contentBox {
-    flex: 1;
-    background: #E2E6F0;
-    padding: 0 15px 0 15px;
+a {
+  color: var(--forest);
 }
+
+/* Área de conteúdo da página inicial */
+.contentBox {
+  flex: 1;
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 18px 16px 40px;
+  box-sizing: border-box;
+}
+
+/* Título de seção: o pontinho laranja é a "bola" da marca */
 .contentTitle {
   display: flex;
+  align-items: center;
+  gap: 10px;
   text-align: start;
-  margin: 0px;
-  font-family: var(--heading);
-  font-size: 16px;
+  margin: 0;
+  font-size: 21px;
+}
+
+.contentTitle::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--mandarin);
+  flex-shrink: 0;
 }
 
 .subcontentBox {
-  margin-top: 20px;
-  margin-bottom: 20px;
-
+  margin: 22px 0;
 }
-
-/* .firstBox, .firstName e .searchBox foram para components/Header/style.css */
 
 /* ---- Acessibilidade ---- */
 
-/* Contorno de foco visível em qualquer elemento navegável pelo teclado */
 :focus-visible {
-  outline: 3px solid #4f46e5;
+  outline: 3px solid var(--mandarin);
   outline-offset: 2px;
   border-radius: 6px;
 }
 
-/* Link "Pular para o conteúdo": aparece só quando recebe foco pelo Tab */
 .pular-conteudo {
   position: absolute;
   left: 8px;
   top: -60px;
   z-index: 20;
-  background: #4f46e5;
-  color: #ffffff;
+  background: var(--crest);
+  color: var(--ink);
   padding: 8px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
 }
 
@@ -124,7 +150,6 @@ p {
   top: 8px;
 }
 
-/* Quem pediu menos animação no sistema operacional não vê transições */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

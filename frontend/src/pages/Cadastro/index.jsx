@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 
 import Aviso from '../../components/Aviso'
+import Arco from '../../components/Arco'
+import { LogoMarca } from '../../components/Logo'
 import Campo from '../../components/Campo'
 import { useAuth } from '../../contexts/AuthContext'
 import { NIVEIS } from '../../utils/atividade'
@@ -70,57 +72,66 @@ function Cadastro() {
   }
 
   return (
-    <main id="conteudo" className="pagina pagina_estreita">
-      <h1 className="pagina-titulo">Criar conta</h1>
-      <p className="pagina-subtitulo">Em um minuto você já pode participar e organizar atividades.</p>
+    <main id="conteudo" className="pagina entrada">
+      <section className="entrada-boas-vindas">
+        <LogoMarca tamanho={46} className="logo-marca_claro" />
+        <p className="entrada-chamada">Chega mais.</p>
+        <p>Crie sua conta, escolha uma atividade e é só aparecer.</p>
+        <Arco className="entrada-arco" />
+      </section>
 
-      <Aviso tipo="erro">{erroGeral}</Aviso>
+      <div className="entrada-form">
+        <h1 className="pagina-titulo">Criar conta</h1>
+        <p className="pagina-subtitulo">Em um minuto você já pode participar e organizar atividades.</p>
 
-      <form className="painel form" onSubmit={enviar} noValidate>
-        <Campo nome="nome" label="Nome *" erro={erros.nome}>
-          <input id="nome" autoComplete="name" value={form.nome} onChange={(e) => alterar('nome', e.target.value)} />
-        </Campo>
-        <Campo nome="email" label="E-mail *" erro={erros.email}>
-          <input id="email" type="email" autoComplete="email" value={form.email}
-            onChange={(e) => alterar('email', e.target.value)} />
-        </Campo>
-        <div className="form-linha">
-          <Campo nome="senha" label="Senha *" erro={erros.senha} dica="Mínimo de 8 caracteres">
-            <input id="senha" type="password" autoComplete="new-password" value={form.senha}
-              onChange={(e) => alterar('senha', e.target.value)} />
-          </Campo>
-          <Campo nome="confirmacao" label="Confirme a senha *" erro={erros.confirmacao}>
-            <input id="confirmacao" type="password" autoComplete="new-password" value={form.confirmacao}
-              onChange={(e) => alterar('confirmacao', e.target.value)} />
-          </Campo>
-        </div>
-        <div className="form-linha">
-          <Campo nome="localizacao" label="Bairro ou cidade" erro={erros.localizacao}>
-            <input id="localizacao" value={form.localizacao} placeholder="Ex.: Pinheiros, São Paulo"
-              onChange={(e) => alterar('localizacao', e.target.value)} />
-          </Campo>
-          <Campo nome="idade" label="Idade" erro={erros.idade}
-            dica="Necessária para atividades e comunidades só para adultos ou só para menores">
-            <input id="idade" type="number" min="13" max="120" inputMode="numeric" value={form.idade}
-              onChange={(e) => alterar('idade', e.target.value)} />
-          </Campo>
-        </div>
-        <div className="form-linha">
-          <Campo nome="proficiencia" label="Seu nível em geral" erro={erros.proficiencia}>
-            <select id="proficiencia" value={form.proficiencia} onChange={(e) => alterar('proficiencia', e.target.value)}>
-              <option value="">Prefiro não dizer</option>
-              {NIVEIS.map((n) => <option key={n.valor} value={n.valor}>{n.texto}</option>)}
-            </select>
-          </Campo>
-        </div>
+        <Aviso tipo="erro">{erroGeral}</Aviso>
 
-        <button className="btn" type="submit" disabled={enviando}>
-          {enviando ? 'Criando conta...' : 'Criar conta'}
-        </button>
-        <p className="form-rodape">
-          Já tem conta? <Link to="/entrar" state={location.state}>Entrar</Link>
-        </p>
-      </form>
+        <form className="painel form" onSubmit={enviar} noValidate>
+          <Campo nome="nome" label="Nome *" erro={erros.nome}>
+            <input id="nome" autoComplete="name" value={form.nome} onChange={(e) => alterar('nome', e.target.value)} />
+          </Campo>
+          <Campo nome="email" label="E-mail *" erro={erros.email}>
+            <input id="email" type="email" autoComplete="email" value={form.email}
+              onChange={(e) => alterar('email', e.target.value)} />
+          </Campo>
+          <div className="form-linha">
+            <Campo nome="senha" label="Senha *" erro={erros.senha} dica="Mínimo de 8 caracteres">
+              <input id="senha" type="password" autoComplete="new-password" value={form.senha}
+                onChange={(e) => alterar('senha', e.target.value)} />
+            </Campo>
+            <Campo nome="confirmacao" label="Confirme a senha *" erro={erros.confirmacao}>
+              <input id="confirmacao" type="password" autoComplete="new-password" value={form.confirmacao}
+                onChange={(e) => alterar('confirmacao', e.target.value)} />
+            </Campo>
+          </div>
+          <div className="form-linha">
+            <Campo nome="localizacao" label="Bairro ou cidade" erro={erros.localizacao}>
+              <input id="localizacao" value={form.localizacao} placeholder="Ex.: Pinheiros, São Paulo"
+                onChange={(e) => alterar('localizacao', e.target.value)} />
+            </Campo>
+            <Campo nome="idade" label="Idade" erro={erros.idade}
+              dica="Necessária para atividades e comunidades só para adultos ou só para menores">
+              <input id="idade" type="number" min="13" max="120" inputMode="numeric" value={form.idade}
+                onChange={(e) => alterar('idade', e.target.value)} />
+            </Campo>
+          </div>
+          <div className="form-linha">
+            <Campo nome="proficiencia" label="Seu nível em geral" erro={erros.proficiencia}>
+              <select id="proficiencia" value={form.proficiencia} onChange={(e) => alterar('proficiencia', e.target.value)}>
+                <option value="">Prefiro não dizer</option>
+                {NIVEIS.map((n) => <option key={n.valor} value={n.valor}>{n.texto}</option>)}
+              </select>
+            </Campo>
+          </div>
+
+          <button className="btn" type="submit" disabled={enviando}>
+            {enviando ? 'Criando conta...' : 'Criar conta'}
+          </button>
+          <p className="form-rodape">
+            Já tem conta? <Link to="/entrar" state={location.state}>Entrar</Link>
+          </p>
+        </form>
+      </div>
     </main>
   )
 }

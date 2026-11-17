@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 
 import Aviso from '../../components/Aviso'
+import Arco from '../../components/Arco'
+import { LogoMarca } from '../../components/Logo'
 import { useAuth } from '../../contexts/AuthContext'
 
 // RF02 — login com e-mail e senha
@@ -37,31 +39,40 @@ function Entrar() {
   }
 
   return (
-    <main id="conteudo" className="pagina pagina_estreita">
-      <h1 className="pagina-titulo">Entrar</h1>
-      <p className="pagina-subtitulo">Que bom te ver de novo! Entre para encontrar sua próxima atividade.</p>
+    <main id="conteudo" className="pagina entrada">
+      <section className="entrada-boas-vindas">
+        <LogoMarca tamanho={46} className="logo-marca_claro" />
+        <p className="entrada-chamada">Bora mexer o corpo?</p>
+        <p>Encontre gente para jogar, correr ou dançar perto de você. Ou chame a galera você mesmo.</p>
+        <Arco className="entrada-arco" />
+      </section>
 
-      <form className="painel form" onSubmit={enviar} noValidate>
-        <div className="campo">
-          <label htmlFor="email">E-mail</label>
-          <input id="email" type="email" autoComplete="email" value={email}
-            onChange={(e) => setEmail(e.target.value)} required />
-        </div>
-        <div className="campo">
-          <label htmlFor="senha">Senha</label>
-          <input id="senha" type="password" autoComplete="current-password" value={senha}
-            onChange={(e) => setSenha(e.target.value)} required />
-        </div>
+      <div className="entrada-form">
+        <h1 className="pagina-titulo">Entrar</h1>
+        <p className="pagina-subtitulo">Que bom te ver de novo! Entre para encontrar sua próxima atividade.</p>
 
-        <Aviso tipo="erro">{erro}</Aviso>
+        <form className="painel form" onSubmit={enviar} noValidate>
+          <div className="campo">
+            <label htmlFor="email">E-mail</label>
+            <input id="email" type="email" autoComplete="email" value={email}
+              onChange={(e) => setEmail(e.target.value)} required />
+          </div>
+          <div className="campo">
+            <label htmlFor="senha">Senha</label>
+            <input id="senha" type="password" autoComplete="current-password" value={senha}
+              onChange={(e) => setSenha(e.target.value)} required />
+          </div>
 
-        <button className="btn" type="submit" disabled={enviando}>
-          {enviando ? 'Entrando...' : 'Entrar'}
-        </button>
-        <p className="form-rodape">
-          Ainda não tem conta? <Link to="/cadastro" state={location.state}>Cadastre-se</Link>
-        </p>
-      </form>
+          <Aviso tipo="erro">{erro}</Aviso>
+
+          <button className="btn" type="submit" disabled={enviando}>
+            {enviando ? 'Entrando...' : 'Entrar'}
+          </button>
+          <p className="form-rodape">
+            Ainda não tem conta? <Link to="/cadastro" state={location.state}>Cadastre-se</Link>
+          </p>
+        </form>
+      </div>
     </main>
   )
 }

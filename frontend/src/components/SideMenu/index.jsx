@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { NavLink } from 'react-router-dom'
 import './style.css'
+import Logo from '../Logo'
 
 // Menu lateral (wireframe 4.4)
 const LINKS = [
@@ -33,7 +34,7 @@ function SideMenu({ id, aberto, onFechar }) {
       <nav id={id} className={`menu-lateral ${aberto ? 'menu-lateral_aberto' : ''}`} aria-label="Menu principal"
         inert={!aberto}>
         <div className="menu-topo">
-          <span className="menu-titulo">Topa-aí</span>
+          <span className="menu-titulo"><Logo tamanho={30} /></span>
           <button ref={fechar} className="menu-fechar" onClick={onFechar} aria-label="Fechar menu">×</button>
         </div>
 
