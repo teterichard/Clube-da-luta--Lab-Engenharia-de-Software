@@ -39,7 +39,7 @@ describeMySQL('Integração com MySQL', () => {
     titulo: 'Basquete no Ibirapuera',
     tipo: 'basquete',
     nivel: 'iniciante',
-    publicoAlvo: 'adultos',
+    publicoAlvo: 'todos',
     dataHora: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString(),
     local: 'Parque Ibirapuera - quadra 3',
     numeroIntegrantes: 2,
@@ -172,5 +172,52 @@ describeMySQL('Integração com MySQL', () => {
       [b.id, b.id],
     );
     expect(restantes[0]).toEqual({ p: 0, c: 0 });
+  });
+
+  test('avaliações: atividade concluída, participante, reputação e duplicidade (UNIQUE)', async () => {
+    const { body: a } = await request(app).post('/api/atividades').set(org.auth).send(atividade());
+    const pedido = await request(app).post(`/api/atividades/${a.id}/participacoes`).set(ana.auth);
+    await request(app).patch(`/api/participacoes/${pedido.body.id}`).set(org.auth).send({ decisao: 'ACEITAR' });
+    await request(app).post(`/api/atividades/${a.id}/iniciar`).set(org.auth);
+    await request(app).post(`/api/atividades/${a.id}/concluir`).set(org.auth);
+
+    const nota = await request(app).post(`/api/atividades/${a.id}/avaliacoes`).set(ana.auth).send({ nota: 5, comentario: 'Ótimo' });
+    expect(nota.status).toBe(201);
+    expect((await request(app).post(`/api/atividades/${a.id}/avaliacoes`).set(ana.auth).send({ nota: 3 })).status).toBe(409);
+    const lista = await request(app).get(`/api/atividades/${a.id}/avaliacoes`).set(org.auth);
+    expect(lista.body).toMatchObject({ media: 5, total: 1, avaliacoes: [{ comentario: 'Ótimo', autor: { nome: 'Ana' } }] });
+
+    expect((await request(app).post(`/api/atividades/${a.id}/participantes/${ana.id}/avaliacao`)
+      .set(org.auth).send({ nota: 4 })).status).toBe(201);
+    const solicitacoes = await request(app).get(`/api/atividades/${a.id}/participacoes`).set(org.auth);
+    expect(solicitacoes.body[0].notaDoOrganizador).toBe(4);
+    expect((await request(app).get('/api/usuarios/me').set(ana.auth)).body.reputacao).toEqual({ media: 4, total: 1 });
+
+    // o UNIQUE do banco segura a duplicidade mesmo se dois pedidos chegarem juntos
+    const [dup] = await pool.query("SELECT COUNT(*) AS n FROM avaliacao WHERE autor_id = ? AND tipo = 'ATIVIDADE'", [ana.id]);
+    expect(Number(dup[0].n)).toBe(1);
+  });
+
+  test('comunidade com modalidade, público e vagas; mural e regra dos 3 meses', async () => {
+    const { body: c } = await request(app).post('/api/comunidades').set(org.auth).send({
+      nome: 'Vôlei de Pinheiros', descricao: 'Jogos aos domingos', modalidade: 'Vôlei', publicoAlvo: 'todos', vagasMaximas: 2,
+    });
+    expect(c).toMatchObject({ modalidade: 'vôlei', publicoAlvo: 'todos', vagasMaximas: 2, vagas: 1 });
+
+    const editada = await request(app).patch(`/api/comunidades/${c.id}`).set(org.auth).send({ vagasMaximas: 3 });
+    expect(editada.body).toMatchObject({ vagasMaximas: 3, vagas: 2 });
+
+    await request(app).post(`/api/comunidades/${c.id}/membros`).set(bia.auth);
+    await request(app).post(`/api/comunidades/${c.id}/mensagens`).set(org.auth).send({ conteudo: 'Bem-vindos!' });
+    await request(app).post(`/api/comunidades/${c.id}/mensagens`).set(bia.auth).send({ conteudo: 'Valeu!' });
+    const mural = await request(app).get(`/api/comunidades/${c.id}/mensagens`).set(bia.auth);
+    expect(mural.body.map((m) => [m.autor.nome, m.conteudo])).toEqual([['Organizador', 'Bem-vindos!'], ['Bia', 'Valeu!']]);
+    expect((await request(app).get(`/api/comunidades/${c.id}/mensagens`).set(carla.auth)).status).toBe(403);
+
+    const cedo = await request(app).post(`/api/comunidades/${c.id}/avaliacoes`).set(bia.auth).send({ nota: 5 });
+    expect(cedo.status).toBe(409);
+    const avaliacoes = await request(app).get(`/api/comunidades/${c.id}/avaliacoes`).set(bia.auth);
+    expect(avaliacoes.body).toMatchObject({ total: 0, minhaAvaliacao: null });
+    expect(new Date(avaliacoes.body.possoAvaliarEm) > new Date()).toBe(true);
   });
 });

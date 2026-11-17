@@ -197,9 +197,16 @@ export function marcarTodasNotificacoesLidas() {
 
 // ---- Comunidades ----
 
-export function listarComunidades(busca) {
+/** filtros opcionais: { modalidade, publicoAlvo, comVaga } */
+export function listarComunidades(busca, filtros = {}) {
+  const params = new URLSearchParams()
   const termo = (busca || '').trim()
-  return requisicao(`/comunidades${termo ? `?busca=${encodeURIComponent(termo)}` : ''}`)
+  if (termo) params.append('busca', termo)
+  Object.entries(filtros).forEach(([chave, valor]) => {
+    if (valor !== '' && valor !== false && valor != null) params.append(chave, valor)
+  })
+  const query = params.toString()
+  return requisicao(`/comunidades${query ? `?${query}` : ''}`)
 }
 
 export function listarMinhasComunidades() {
@@ -233,4 +240,36 @@ export function sairDaComunidade(id) {
 /** dados: { decisao: 'ACEITAR' | 'RECUSAR' } ou { papel: 'ADMIN' } */
 export function gerenciarMembro(id, usuarioId, dados) {
   return requisicao(`/comunidades/${id}/membros/${usuarioId}`, { method: 'PATCH', body: dados })
+}
+
+// ---- Mural da comunidade (RF17) ----
+
+export function listarMensagens(comunidadeId) {
+  return requisicao(`/comunidades/${comunidadeId}/mensagens`)
+}
+
+export function enviarMensagem(comunidadeId, conteudo) {
+  return requisicao(`/comunidades/${comunidadeId}/mensagens`, { method: 'POST', body: { conteudo } })
+}
+
+// ---- Avaliações (RF12–RF14 e RF18) ----
+
+export function avaliarAtividade(atividadeId, nota, comentario) {
+  return requisicao(`/atividades/${atividadeId}/avaliacoes`, { method: 'POST', body: { nota, comentario } })
+}
+
+export function listarAvaliacoesDaAtividade(atividadeId) {
+  return requisicao(`/atividades/${atividadeId}/avaliacoes`)
+}
+
+export function avaliarParticipante(atividadeId, usuarioId, nota) {
+  return requisicao(`/atividades/${atividadeId}/participantes/${usuarioId}/avaliacao`, { method: 'POST', body: { nota } })
+}
+
+export function avaliarComunidade(comunidadeId, nota, comentario) {
+  return requisicao(`/comunidades/${comunidadeId}/avaliacoes`, { method: 'POST', body: { nota, comentario } })
+}
+
+export function listarAvaliacoesDaComunidade(comunidadeId) {
+  return requisicao(`/comunidades/${comunidadeId}/avaliacoes`)
 }

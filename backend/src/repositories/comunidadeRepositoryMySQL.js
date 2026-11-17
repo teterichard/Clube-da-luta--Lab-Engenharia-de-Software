@@ -5,6 +5,9 @@ function paraComunidade(l) {
     nome: l.nome,
     descricao: l.descricao,
     visibilidade: l.visibilidade,
+    modalidade: l.modalidade,
+    publicoAlvo: l.publico_alvo,
+    vagasMaximas: l.vagas_maximas,
     criadorId: l.criador_id,
     criadaEm: l.criada_em,
   };
@@ -24,16 +27,19 @@ function criarComunidadeRepositoryMySQL(pool) {
   return {
     async salvar(c) {
       const [resultado] = await pool.execute(
-        'INSERT INTO comunidade (nome, descricao, visibilidade, criador_id, criada_em) VALUES (?, ?, ?, ?, ?)',
-        [c.nome, c.descricao, c.visibilidade, c.criadorId, c.criadaEm],
+        `INSERT INTO comunidade (nome, descricao, visibilidade, modalidade, publico_alvo, vagas_maximas, criador_id, criada_em)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [c.nome, c.descricao, c.visibilidade, c.modalidade ?? null, c.publicoAlvo ?? null,
+          c.vagasMaximas ?? null, c.criadorId, c.criadaEm],
       );
       return { id: resultado.insertId, ...c };
     },
 
     async atualizar(c) {
       await pool.execute(
-        'UPDATE comunidade SET nome = ?, descricao = ?, visibilidade = ? WHERE id = ?',
-        [c.nome, c.descricao, c.visibilidade, c.id],
+        `UPDATE comunidade SET nome = ?, descricao = ?, visibilidade = ?, modalidade = ?, publico_alvo = ?, vagas_maximas = ?
+          WHERE id = ?`,
+        [c.nome, c.descricao, c.visibilidade, c.modalidade ?? null, c.publicoAlvo ?? null, c.vagasMaximas ?? null, c.id],
       );
       return c;
     },
@@ -66,8 +72,8 @@ function criarComunidadeRepositoryMySQL(pool) {
 
     async atualizarMembro(m) {
       await pool.execute(
-        'UPDATE comunidade_membro SET papel = ?, status = ? WHERE comunidade_id = ? AND usuario_id = ?',
-        [m.papel, m.status, m.comunidadeId, m.usuarioId],
+        'UPDATE comunidade_membro SET papel = ?, status = ?, entrou_em = ? WHERE comunidade_id = ? AND usuario_id = ?',
+        [m.papel, m.status, m.entrouEm, m.comunidadeId, m.usuarioId],
       );
       return m;
     },
@@ -91,6 +97,29 @@ function criarComunidadeRepositoryMySQL(pool) {
     async listarVinculosDoUsuario(usuarioId) {
       const [linhas] = await pool.execute('SELECT * FROM comunidade_membro WHERE usuario_id = ?', [usuarioId]);
       return linhas.map(paraMembro);
+    },
+
+    /** RF17 — mural. */
+    async salvarMensagem(m) {
+      const [resultado] = await pool.execute(
+        'INSERT INTO comunidade_mensagem (comunidade_id, autor_id, conteudo, enviada_em) VALUES (?, ?, ?, ?)',
+        [m.comunidadeId, m.autorId, m.conteudo, m.enviadaEm],
+      );
+      return { id: resultado.insertId, ...m };
+    },
+
+    /** As `limite` mais recentes, em ordem cronológica (LIMIT não aceita placeholder no execute). */
+    async listarMensagens(comunidadeId, limite = 100) {
+      const n = Math.max(1, Math.min(Number(limite) || 100, 500));
+      const [linhas] = await pool.execute(
+        `SELECT * FROM (
+           SELECT * FROM comunidade_mensagem WHERE comunidade_id = ? ORDER BY enviada_em DESC, id DESC LIMIT ${n}
+         ) recentes ORDER BY enviada_em, id`,
+        [comunidadeId],
+      );
+      return linhas.map((l) => ({
+        id: l.id, comunidadeId: l.comunidade_id, autorId: l.autor_id, conteudo: l.conteudo, enviadaEm: l.enviada_em,
+      }));
     },
 
     async contarMembrosAtivos(ids) {

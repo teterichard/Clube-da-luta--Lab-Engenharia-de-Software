@@ -3,14 +3,21 @@ import { Link, useLocation, useParams } from 'react-router-dom'
 import '../Comunidades/style.css'
 
 import Aviso from '../../components/Aviso'
+import Avaliacoes from '../../components/Avaliacoes'
+import Mural from './Mural'
 import { useAuth } from '../../contexts/AuthContext'
 import {
+  avaliarComunidade,
   buscarComunidade,
   entrarNaComunidade,
   gerenciarMembro,
+  listarAvaliacoesDaComunidade,
   listarMembros,
   sairDaComunidade,
 } from '../../services/api'
+import { PUBLICOS, TIPOS, textoDaLista } from '../../utils/atividade'
+
+const dia = (data) => new Date(data).toLocaleDateString('pt-BR')
 
 function DetalhesComunidade() {
   const { id } = useParams()
@@ -78,15 +85,24 @@ function DetalhesComunidade() {
           <span className={`tag ${comunidade.visibilidade === 'PRIVADA' ? 'tag_amarela' : ''}`}>
             {comunidade.visibilidade === 'PRIVADA' ? 'Privada' : 'Pública'}
           </span>
+          {comunidade.modalidade && <span className="tag tag_roxa">{textoDaLista(TIPOS, comunidade.modalidade)}</span>}
+          {comunidade.publicoAlvo && comunidade.publicoAlvo !== 'todos' && (
+            <span className="tag">{textoDaLista(PUBLICOS, comunidade.publicoAlvo)}</span>
+          )}
           {souAdmin && <span className="tag tag_verde">Você administra</span>}
         </div>
         <h1 className="pagina-titulo">{comunidade.nome}</h1>
         <p className="detalhe-desc">{comunidade.descricao}</p>
-        <p className="comunidade-meta">{comunidade.totalMembros} membro{comunidade.totalMembros === 1 ? '' : 's'}</p>
+        <p className="comunidade-meta">
+          {comunidade.totalMembros} membro{comunidade.totalMembros === 1 ? '' : 's'}
+          {comunidade.vagasMaximas != null && (comunidade.vagas === 0
+            ? ' · lotada'
+            : ` · ${comunidade.vagas} vaga${comunidade.vagas === 1 ? '' : 's'} de ${comunidade.vagasMaximas}`)}
+        </p>
 
         <div className="acoes">
           {!comunidade.meuStatus && (
-            <button className="btn" disabled={enviando} onClick={() => agir(() => entrarNaComunidade(id),
+            <button className="btn" disabled={enviando || comunidade.vagas === 0} onClick={() => agir(() => entrarNaComunidade(id),
               comunidade.visibilidade === 'PUBLICA' ? 'Bem-vindo à comunidade!' : 'Pedido enviado! Um administrador vai responder.')}>
               {comunidade.visibilidade === 'PUBLICA' ? 'Entrar na comunidade' : 'Pedir para entrar'}
             </button>
@@ -162,6 +178,23 @@ function DetalhesComunidade() {
           </ul>
         )}
       </section>
+
+      {comunidade.meuStatus === 'ATIVO' && <Mural comunidadeId={id} />}
+
+      {/* RF18: membros avaliam depois de 3 meses; em privada, só membros veem */}
+      {(comunidade.visibilidade === 'PUBLICA' || comunidade.meuStatus === 'ATIVO') && (
+        <Avaliacoes
+          key={`${id}-${comunidade.meuStatus}`}
+          idSecao="avaliacoes-comunidade"
+          titulo="Avaliações da comunidade"
+          carregar={() => listarAvaliacoesDaComunidade(id)}
+          enviar={(nota, comentario) => avaliarComunidade(id, nota, comentario)}
+          podeAvaliar={(dados) => !!dados.possoAvaliarEm && new Date(dados.possoAvaliarEm) <= new Date()}
+          aviso={(dados) => dados.possoAvaliarEm && !dados.minhaAvaliacao && new Date(dados.possoAvaliarEm) > new Date() && (
+            <p className="secao-texto">Você poderá avaliar a partir de {dia(dados.possoAvaliarEm)} (3 meses na comunidade).</p>
+          )}
+        />
+      )}
     </main>
   )
 }

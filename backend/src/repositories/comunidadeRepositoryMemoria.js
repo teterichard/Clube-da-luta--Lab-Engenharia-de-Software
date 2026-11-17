@@ -2,7 +2,9 @@
 function criarComunidadeRepositoryMemoria() {
   const comunidades = new Map();
   let membros = [];
+  const mensagens = [];
   let proximoId = 1;
+  let proximaMensagem = 1;
   const chave = (comunidadeId, usuarioId) => `${comunidadeId}:${usuarioId}`;
   const igual = (a, b) => String(a) === String(b);
 
@@ -52,6 +54,20 @@ function criarComunidadeRepositoryMemoria() {
     },
     async listarVinculosDoUsuario(usuarioId) {
       return membros.filter((m) => igual(m.usuarioId, usuarioId)).map((m) => ({ ...m }));
+    },
+    /** RF17 — mural. */
+    async salvarMensagem(mensagem) {
+      const salva = { id: proximaMensagem++, ...mensagem };
+      mensagens.push(salva);
+      return { ...salva };
+    },
+    /** As `limite` mais recentes, em ordem cronológica. */
+    async listarMensagens(comunidadeId, limite = 100) {
+      return mensagens
+        .filter((m) => igual(m.comunidadeId, comunidadeId))
+        .sort((a, b) => new Date(a.enviadaEm) - new Date(b.enviadaEm) || a.id - b.id)
+        .slice(-limite)
+        .map((m) => ({ ...m }));
     },
     /** Map comunidadeId → quantidade de membros ATIVOS. */
     async contarMembrosAtivos(ids) {

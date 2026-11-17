@@ -20,7 +20,7 @@ const corpo = (extra = {}) => ({
   titulo: 'Futebol no parque',
   tipo: 'futebol',
   nivel: 'iniciante',
-  publicoAlvo: 'adultos',
+  publicoAlvo: 'todos', // sem restrição de idade (RF19 tem testes próprios)
   dataHora: '2026-11-20T18:00:00-03:00',
   local: 'Parque Ibirapuera - campo 1',
   numeroIntegrantes: 2,
@@ -118,7 +118,9 @@ describe('Inscrever-se em atividade — API', () => {
   });
 
   test('CT-07: filtros combinados (tipo + nível + público-alvo + local)', async () => {
-    const alvo = await criar({ titulo: 'Basquete adulto', tipo: 'basquete', nivel: 'intermediario', local: 'Quadra Mackenzie' });
+    const alvo = await criar({
+      titulo: 'Basquete adulto', tipo: 'basquete', nivel: 'intermediario', publicoAlvo: 'adultos', local: 'Quadra Mackenzie',
+    });
     await criar({ titulo: 'Basquete teen', tipo: 'basquete', nivel: 'intermediario', publicoAlvo: 'adolescentes' });
     await criar({ titulo: 'Basquete iniciante', tipo: 'basquete', nivel: 'iniciante' });
 

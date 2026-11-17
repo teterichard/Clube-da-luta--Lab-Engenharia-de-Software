@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import Aviso from '../../components/Aviso'
 import Campo from '../../components/Campo'
 import { useAuth } from '../../contexts/AuthContext'
-import { atualizarPerfil } from '../../services/api'
+import { atualizarPerfil, buscarPerfil } from '../../services/api'
+import Estrelas from '../../components/Estrelas'
 import { NIVEIS } from '../../utils/atividade'
 
 // Perfil do usuário logado: dados usados para sugerir atividades do nível certo (persona Francisco)
@@ -20,6 +21,11 @@ function Perfil() {
   const [mensagem, setMensagem] = useState('')
   const [erroGeral, setErroGeral] = useState('')
   const [salvando, setSalvando] = useState(false)
+
+  // o login não traz a reputação: busca o perfil completo ao abrir a tela
+  useEffect(() => {
+    buscarPerfil().then((p) => atualizarUsuario(p)).catch(() => {})
+  }, [atualizarUsuario])
 
   function alterar(campo, valor) {
     setForm({ ...form, [campo]: valor })
@@ -38,7 +44,7 @@ function Perfil() {
         idade: form.idade === '' ? null : Number(form.idade),
         proficiencia: form.proficiencia || null,
       })
-      atualizarUsuario(atualizado)
+      atualizarUsuario({ ...usuario, ...atualizado })
       setMensagem('Perfil atualizado!')
     } catch (erro) {
       const porCampo = {}
@@ -59,6 +65,16 @@ function Perfil() {
     <main id="conteudo" className="pagina pagina_estreita">
       <h1 className="pagina-titulo">Meu perfil</h1>
       <p className="pagina-subtitulo">{usuario.email}</p>
+      {usuario.reputacao && (
+        <p className="reputacao">
+          {usuario.reputacao.total > 0 ? (
+            <>
+              <Estrelas nota={usuario.reputacao.media} /> {usuario.reputacao.media} como participante
+              ({usuario.reputacao.total} {usuario.reputacao.total === 1 ? 'avaliação' : 'avaliações'} de organizadores)
+            </>
+          ) : 'Você ainda não recebeu avaliações dos organizadores.'}
+        </p>
+      )}
 
       <Aviso tipo="sucesso">{mensagem}</Aviso>
       <Aviso tipo="erro">{erroGeral}</Aviso>
@@ -71,7 +87,7 @@ function Perfil() {
           <input id="localizacao" value={form.localizacao} onChange={(e) => alterar('localizacao', e.target.value)} />
         </Campo>
         <div className="form-linha">
-          <Campo nome="idade" label="Idade" erro={erros.idade}>
+          <Campo nome="idade" label="Idade" erro={erros.idade} dica="Usada nas atividades para adultos ou para menores">
             <input id="idade" type="number" min="13" max="120" value={form.idade}
               onChange={(e) => alterar('idade', e.target.value)} />
           </Campo>

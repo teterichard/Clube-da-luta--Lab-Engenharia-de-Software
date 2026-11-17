@@ -31,7 +31,14 @@ const campos = (fn) => {
 describe('Comunidade — criar e editar', () => {
   test('cria pública por padrão, guardando o criador', () => {
     expect(criarComunidade({ nome: ' Basquete da Zona Sul ', descricao: 'Jogos aos sábados' }, ADMIN, AGORA)).toEqual({
-      nome: 'Basquete da Zona Sul', descricao: 'Jogos aos sábados', visibilidade: 'PUBLICA', criadorId: 1, criadaEm: AGORA,
+      nome: 'Basquete da Zona Sul',
+      descricao: 'Jogos aos sábados',
+      visibilidade: 'PUBLICA',
+      modalidade: null,
+      publicoAlvo: null,
+      vagasMaximas: null,
+      criadorId: 1,
+      criadaEm: AGORA,
     });
   });
 

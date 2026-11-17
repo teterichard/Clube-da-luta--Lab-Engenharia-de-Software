@@ -27,6 +27,10 @@ const { criarComunidadeRepositoryMemoria } = require('./repositories/comunidadeR
 const { criarComunidadeService } = require('./services/comunidadeService');
 const { criarComunidadeController } = require('./controllers/comunidadeController');
 const { comunidadeRoutes } = require('./routes/comunidadeRoutes');
+const { criarAvaliacaoRepositoryMemoria } = require('./repositories/avaliacaoRepositoryMemoria');
+const { criarAvaliacaoService } = require('./services/avaliacaoService');
+const { criarAvaliacaoController } = require('./controllers/avaliacaoController');
+const { cors } = require('./middlewares/cors');
 
 /**
  * Monta a aplicação Express sem subir o servidor (facilita testes com Supertest).
@@ -39,14 +43,17 @@ function criarApp({
   conviteRepository = criarConviteRepositoryMemoria(),
   notificacaoRepository = criarNotificacaoRepositoryMemoria(),
   comunidadeRepository = criarComunidadeRepositoryMemoria(),
+  avaliacaoRepository = criarAvaliacaoRepositoryMemoria(),
   comTrava,
   eventos = criarPublicador(),
   jwtSegredo,
   jwtExpiracao,
   custoBcrypt,
   relogio,
+  corsOrigem,
 }) {
   const app = express();
+  app.use(cors(corsOrigem)); // front hospedado em outro domínio (deploy)
   app.use(express.json());
 
   const repositorios = { atividadeRepository, participacaoRepository, conviteRepository };
@@ -55,6 +62,7 @@ function criarApp({
     usuarioRepository,
     notificacaoRepository,
     comunidadeRepository,
+    avaliacaoRepository,
     comTrava: comTrava || criarTravaMemoria(repositorios),
     eventos,
     relogio,
@@ -66,6 +74,7 @@ function criarApp({
     ...deps, jwtSegredo, jwtExpiracao, custoBcrypt,
   }));
   const comunidadeController = criarComunidadeController(criarComunidadeService(deps));
+  const avaliacaoController = criarAvaliacaoController(criarAvaliacaoService(deps));
   const notificacaoService = criarNotificacaoService(deps);
   notificacaoService.registrarObservadores();
   const notificacaoController = criarNotificacaoController(notificacaoService);
@@ -75,10 +84,10 @@ function criarApp({
   app.use('/api/auth', autenticacaoRoutes({ autenticacaoController }));
   app.use('/api/usuarios', usuarioRoutes({ autenticacaoController, autenticar }));
   app.use('/api/atividades', atividadeRoutes({
-    controller, participacaoController, conviteController, autenticar,
+    controller, participacaoController, conviteController, avaliacaoController, autenticar,
   }));
   app.use('/api/convites', conviteRoutes({ conviteController, autenticar }));
-  app.use('/api/comunidades', comunidadeRoutes({ comunidadeController, autenticar }));
+  app.use('/api/comunidades', comunidadeRoutes({ comunidadeController, avaliacaoController, autenticar }));
   app.use('/api/notificacoes', notificacaoRoutes({ notificacaoController, autenticar }));
   app.use('/api/participacoes', participacaoRoutes({ participacaoController, autenticar }));
 

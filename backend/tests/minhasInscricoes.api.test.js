@@ -14,7 +14,7 @@ const corpo = (extra = {}) => ({
   titulo: 'Vôlei de praia',
   tipo: 'outro',
   nivel: 'intermediario',
-  publicoAlvo: 'adultos',
+  publicoAlvo: 'todos',
   dataHora: '2026-11-25T09:00:00-03:00',
   local: 'Praia do Gonzaga',
   numeroIntegrantes: 2,

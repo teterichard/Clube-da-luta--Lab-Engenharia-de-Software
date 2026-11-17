@@ -30,7 +30,7 @@ describe('Concorrência no aceite — API', () => {
       titulo: 'Tênis em dupla',
       tipo: 'outro',
       nivel: 'avancado',
-      publicoAlvo: 'adultos',
+      publicoAlvo: 'todos',
       dataHora: '2026-11-21T08:00:00-03:00',
       local: 'Clube',
       numeroIntegrantes: 2,

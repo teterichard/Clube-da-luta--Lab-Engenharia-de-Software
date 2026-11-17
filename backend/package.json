@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
+    "db:init": "node scripts/criarTabelas.js",
     "test": "jest --runInBand",
     "test:mysql": "DB_TEST=true jest --runInBand tests/integracao"
   },

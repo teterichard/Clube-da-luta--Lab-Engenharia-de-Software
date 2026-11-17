@@ -15,7 +15,7 @@ function criarAtividadeController(atividadeService) {
     }),
 
     listar: tratar(async (req, res) => {
-      res.json(await atividadeService.listar(req.query));
+      res.json(await atividadeService.listar(req.query, req.usuario));
     }),
 
     listarOrganizadas: tratar(async (req, res) => {

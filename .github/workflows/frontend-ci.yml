@@ -1,0 +1,33 @@
+name: Esteira CI - Front-end React
+
+on:
+  push:
+    branches: [ "main", "develop", "feature/**" ]
+    paths: [ "frontend/**", ".github/workflows/frontend-ci.yml" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+    paths: [ "frontend/**", ".github/workflows/frontend-ci.yml" ]
+  workflow_dispatch:
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Build de produção (Vite)
+        run: npm run build

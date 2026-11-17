@@ -67,3 +67,15 @@
   flex-direction: column;
   gap: 8px;
 }
+
+.filtro-modalidade {
+  margin-top: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+}

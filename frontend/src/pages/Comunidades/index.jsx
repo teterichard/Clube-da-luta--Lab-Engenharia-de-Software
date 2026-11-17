@@ -4,6 +4,7 @@ import './style.css'
 
 import Aviso from '../../components/Aviso'
 import { listarComunidades } from '../../services/api'
+import { TIPOS, textoDaLista } from '../../utils/atividade'
 
 const SITUACAO = {
   ATIVO: { texto: 'Você participa', classe: 'tag_verde' },
@@ -20,7 +21,9 @@ function CartaoComunidade({ c }) {
           <strong>{c.nome}</strong>
           <span className="comunidade-desc">{c.descricao}</span>
           <span className="comunidade-meta">
+            {c.modalidade && `${textoDaLista(TIPOS, c.modalidade)} · `}
             {c.totalMembros} membro{c.totalMembros === 1 ? '' : 's'}
+            {c.vagas != null && ` · ${c.vagas === 0 ? 'lotada' : `${c.vagas} vaga${c.vagas === 1 ? '' : 's'}`}`}
             {c.visibilidade === 'PRIVADA' && ' · privada'}
           </span>
         </span>
@@ -33,16 +36,17 @@ function CartaoComunidade({ c }) {
 // Comunidades de interesse (wiki 2.3 — "seguir comunidades"; persona Ângela)
 function Comunidades() {
   const [busca, setBusca] = useState('')
+  const [modalidade, setModalidade] = useState('')
   const [lista, setLista] = useState(null)
   const [erro, setErro] = useState('')
 
   // espera a pessoa parar de digitar antes de buscar
   useEffect(() => {
     const timer = setTimeout(() => {
-      listarComunidades(busca).then((r) => { setLista(r); setErro('') }).catch((e) => setErro(e.message))
+      listarComunidades(busca, { modalidade }).then((r) => { setLista(r); setErro('') }).catch((e) => setErro(e.message))
     }, 250)
     return () => clearTimeout(timer)
-  }, [busca])
+  }, [busca, modalidade])
 
   const minhas = (lista || []).filter((c) => c.meuStatus)
   const outras = (lista || []).filter((c) => !c.meuStatus)
@@ -61,6 +65,11 @@ function Comunidades() {
         <label htmlFor="busca-comunidade" className="sr-only">Buscar comunidades</label>
         <input id="busca-comunidade" className="busca-comunidade" type="search" placeholder="Buscar por nome ou assunto..."
           value={busca} onChange={(e) => setBusca(e.target.value)} />
+        <select className="filtro-modalidade" aria-label="Modalidade" value={modalidade}
+          onChange={(e) => setModalidade(e.target.value)}>
+          <option value="">Todas as modalidades</option>
+          {TIPOS.map((t) => <option key={t.valor} value={t.valor}>{t.texto}</option>)}
+        </select>
       </div>
 
       <Aviso tipo="erro">{erro}</Aviso>
@@ -75,10 +84,10 @@ function Comunidades() {
             </section>
           )}
           <section className="painel" aria-labelledby="titulo-descobrir">
-            <h2 id="titulo-descobrir" className="secao-titulo">{busca.trim() ? 'Resultados' : 'Descobrir'}</h2>
+            <h2 id="titulo-descobrir" className="secao-titulo">{busca.trim() || modalidade ? 'Resultados' : 'Descobrir'}</h2>
             {outras.length === 0 ? (
               <p className="vazio">
-                {busca.trim() ? 'Nenhuma comunidade encontrada. Que tal criar uma?' : 'Você já está em todas as comunidades por aqui!'}
+                {busca.trim() || modalidade ? 'Nenhuma comunidade encontrada. Que tal criar uma?' : 'Você já está em todas as comunidades por aqui!'}
               </p>
             ) : (
               <ul className="lista-cartoes">{outras.map((c) => <CartaoComunidade key={c.id} c={c} />)}</ul>

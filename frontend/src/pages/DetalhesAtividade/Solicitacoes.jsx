@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 
 import Aviso from '../../components/Aviso'
-import { listarSolicitacoes, responderSolicitacao } from '../../services/api'
+import { listarSolicitacoes, responderSolicitacao, avaliarParticipante } from '../../services/api'
 import Tag from '../../components/Tag'
+import Estrelas from '../../components/Estrelas'
 import { STATUS_SOLICITACAO } from '../../utils/status'
 
 // Passo 7 do UC "Inscrever-se em atividade": organizador aceita ou recusa (CT-01 / CT-05)
@@ -36,8 +37,23 @@ function Solicitacoes({ atividade, onAtualizar }) {
     }
   }
 
+  // RF14: depois de concluída, o organizador dá uma nota para cada participante confirmado
+  async function avaliar(usuarioId, nota) {
+    setErro('')
+    setRespondendo(usuarioId)
+    try {
+      await avaliarParticipante(atividade.id, usuarioId, nota)
+      carregar()
+    } catch (e) {
+      setErro(e.message)
+    } finally {
+      setRespondendo(null)
+    }
+  }
+
   const pendentes = lista.filter((s) => s.status === 'PENDENTE').length
   const podeResponder = atividade.status === 'AGENDADA'
+  const concluida = atividade.status === 'CONCLUIDA'
 
   return (
     <section className="painel" aria-labelledby="titulo-solicitacoes">
@@ -45,6 +61,9 @@ function Solicitacoes({ atividade, onAtualizar }) {
         Participantes e solicitações
         {pendentes > 0 && <span className="contador" aria-label={`${pendentes} pendentes`}>{pendentes}</span>}
       </h2>
+      {concluida && lista.some((s) => s.status === 'ACEITO' && !s.notaDoOrganizador) && (
+        <p className="secao-texto">Atividade concluída: dê uma nota para cada participante confirmado.</p>
+      )}
       <Aviso tipo="erro">{erro}</Aviso>
 
       {lista.length === 0 && <p className="vazio">Ninguém pediu para participar ainda.</p>}
@@ -60,7 +79,12 @@ function Solicitacoes({ atividade, onAtualizar }) {
                 <span>pediu em {new Date(s.solicitadaEm).toLocaleDateString('pt-BR')}</span>
               </div>
 
-              {s.status === 'PENDENTE' && podeResponder ? (
+              {concluida && s.status === 'ACEITO' ? (
+                s.notaDoOrganizador
+                  ? <Estrelas nota={s.notaDoOrganizador} />
+                  : <Estrelas onEscolher={(nota) => avaliar(s.usuarioId, nota)} rotulo={`Nota para ${nome}`}
+                    desabilitado={respondendo === s.usuarioId} />
+              ) : s.status === 'PENDENTE' && podeResponder ? (
                 <div className="solicitacao-acoes">
                   <button className="btn btn_pequeno btn_cinza" onClick={() => responder(s.id, 'RECUSAR')}
                     disabled={respondendo === s.id} aria-label={`Recusar ${nome}`}>Recusar</button>
