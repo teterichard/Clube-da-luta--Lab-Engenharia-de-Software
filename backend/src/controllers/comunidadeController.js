@@ -27,6 +27,12 @@ function criarComunidadeController(comunidadeService) {
     sair: tratar(async (req, res) => {
       res.json(await comunidadeService.sair(req.params.id, req.usuario));
     }),
+    listarMensagens: tratar(async (req, res) => {
+      res.json(await comunidadeService.listarMensagens(req.params.id, req.usuario));
+    }),
+    enviarMensagem: tratar(async (req, res) => {
+      res.status(201).json(await comunidadeService.enviarMensagem(req.params.id, req.body, req.usuario));
+    }),
     gerenciarMembro: tratar(async (req, res) => {
       res.json(await comunidadeService.gerenciarMembro(req.params.id, req.params.usuarioId, req.body, req.usuario));
     }),

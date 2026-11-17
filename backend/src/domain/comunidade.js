@@ -11,7 +11,12 @@ const { Decisao } = require('./participacao');
  * Comunidades — grupos de pessoas com interesses em comum (wiki 2.3: "seguir comunidades de interesse").
  * Portado da classe Java Comunidade: nome, descrição e visibilidade obrigatórios; públicas permitem
  * entrada direta, privadas exigem aprovação de um administrador.
+ * Caso de uso "Criar comunidade" (RF15): também modalidade, público-alvo e número máximo de integrantes
+ * (opcionais: sem limite, a comunidade não lota). RF17: mural de mensagens entre os membros.
  */
+
+const MIN_VAGAS = 2;
+const MAX_VAGAS = 10000;
 
 const texto = (v) => (typeof v === 'string' ? v.trim() : '');
 const mesmoId = (a, b) => a != null && b != null && String(a) === String(b);
@@ -29,7 +34,39 @@ function validarCampos(d, erros) {
   if (!Object.values(Visibilidade).includes(visibilidade)) {
     erros.push({ campo: 'visibilidade', mensagem: 'Visibilidade deve ser PUBLICA ou PRIVADA' });
   }
-  return { nome, descricao, visibilidade };
+
+  const modalidade = texto(d.modalidade).toLowerCase() || null;
+  if (modalidade && modalidade.length > 50) {
+    erros.push({ campo: 'modalidade', mensagem: 'Modalidade deve ter no máximo 50 caracteres' });
+  }
+  const publicoAlvo = texto(d.publicoAlvo).toLowerCase() || null;
+  if (publicoAlvo && publicoAlvo.length > 50) {
+    erros.push({ campo: 'publicoAlvo', mensagem: 'Público-alvo deve ter no máximo 50 caracteres' });
+  }
+  let vagasMaximas = null;
+  if (d.vagasMaximas !== undefined && d.vagasMaximas !== null && d.vagasMaximas !== '') {
+    vagasMaximas = d.vagasMaximas;
+    if (!Number.isInteger(vagasMaximas) || vagasMaximas < MIN_VAGAS || vagasMaximas > MAX_VAGAS) {
+      erros.push({
+        campo: 'vagasMaximas',
+        mensagem: `Número máximo de integrantes deve ser um inteiro entre ${MIN_VAGAS} e ${MAX_VAGAS}`,
+      });
+    }
+  }
+  return {
+    nome, descricao, visibilidade, modalidade, publicoAlvo, vagasMaximas,
+  };
+}
+
+/** Membros ativos contam vaga; pedidos pendentes não. Sem limite → null. */
+function calcularVagas(comunidade, membros) {
+  if (comunidade.vagasMaximas == null) return null;
+  const ativos = membros.filter((m) => m.status === StatusMembro.ATIVO).length;
+  return Math.max(comunidade.vagasMaximas - ativos, 0);
+}
+
+function exigirVaga(comunidade, membros) {
+  if (calcularVagas(comunidade, membros) === 0) throw new ErroRegraNegocio('Comunidade sem vagas');
 }
 
 /** RCo01 — cria a comunidade; quem cria vira o primeiro administrador. */
@@ -59,9 +96,17 @@ function editarComunidade(atual, alteracoes, membros, usuario) {
   if (!ehAdmin(membros, usuario)) throw new ErroProibido('Somente administradores podem editar a comunidade');
   const a = alteracoes || {};
   const mesclado = {};
-  ['nome', 'descricao', 'visibilidade'].forEach((c) => { mesclado[c] = a[c] !== undefined ? a[c] : atual[c]; });
+  ['nome', 'descricao', 'visibilidade', 'modalidade', 'publicoAlvo', 'vagasMaximas']
+    .forEach((c) => { mesclado[c] = a[c] !== undefined ? a[c] : atual[c]; });
   const erros = [];
   const campos = validarCampos(mesclado, erros);
+  const ativos = membros.filter((m) => m.status === StatusMembro.ATIVO).length;
+  if (campos.vagasMaximas != null && campos.vagasMaximas < ativos) {
+    erros.push({
+      campo: 'vagasMaximas',
+      mensagem: `A comunidade já tem ${ativos} membros; o limite não pode ser menor que isso`,
+    });
+  }
   if (erros.length > 0) throw new ErroValidacao(erros);
   return { ...atual, ...campos };
 }
@@ -74,6 +119,7 @@ function entrar(comunidade, membros, usuario, agora = new Date()) {
       ? 'Seu pedido para entrar já está aguardando aprovação'
       : 'Você já faz parte desta comunidade');
   }
+  exigirVaga(comunidade, membros);
   const publica = comunidade.visibilidade === Visibilidade.PUBLICA;
   return {
     comunidadeId: comunidade.id,
@@ -98,7 +144,7 @@ function sair(membros, usuario) {
 }
 
 /** RCo05 — admin aprova ou recusa um pedido pendente. Recusar remove o pedido (a pessoa pode pedir de novo). */
-function responderPedido(membros, usuario, alvoId, decisao) {
+function responderPedido(membros, usuario, alvoId, decisao, comunidade = {}) {
   const d = typeof decisao === 'string' ? decisao.trim().toUpperCase() : '';
   if (!Object.values(Decisao).includes(d)) {
     throw new ErroValidacao([{ campo: 'decisao', mensagem: 'Decisão deve ser ACEITAR ou RECUSAR' }]);
@@ -107,6 +153,7 @@ function responderPedido(membros, usuario, alvoId, decisao) {
   const alvo = membros.find((m) => mesmoId(m.usuarioId, alvoId));
   if (!alvo) throw new ErroNaoEncontrado('Pedido não encontrado');
   if (alvo.status !== StatusMembro.PENDENTE) throw new ErroRegraNegocio('Este pedido já foi respondido');
+  if (d === Decisao.ACEITAR) exigirVaga(comunidade, membros);
   return d === Decisao.ACEITAR ? { ...alvo, status: StatusMembro.ATIVO } : null;
 }
 
@@ -127,8 +174,28 @@ function membrosVisiveis(comunidade, membros, usuario) {
   return ehAdmin(membros, usuario) ? membros : membros.filter((m) => m.status === StatusMembro.ATIVO);
 }
 
+/** RF17 — mural: só membros ativos leem e escrevem. */
+function verificarAcessoAoMural(membros, usuario) {
+  if (!ehMembroAtivo(membros, usuario)) throw new ErroProibido('Só membros da comunidade participam do mural');
+}
+
+function criarMensagem(comunidade, membros, usuario, conteudo, agora = new Date()) {
+  verificarAcessoAoMural(membros, usuario);
+  const c = texto(conteudo);
+  if (!c || c.length > 500) {
+    throw new ErroValidacao([{ campo: 'conteudo', mensagem: 'Mensagem deve ter entre 1 e 500 caracteres' }]);
+  }
+  return {
+    comunidadeId: comunidade.id, autorId: usuario.id, conteudo: c, enviadaEm: agora,
+  };
+}
+
 module.exports = {
   criarComunidade,
+  calcularVagas,
+  ehMembroAtivo,
+  verificarAcessoAoMural,
+  criarMensagem,
   editarComunidade,
   entrar,
   sair,

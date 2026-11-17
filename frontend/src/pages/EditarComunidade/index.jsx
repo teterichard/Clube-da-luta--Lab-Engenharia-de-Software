@@ -15,7 +15,16 @@ function EditarComunidade() {
     buscarComunidade(id)
       .then((c) => {
         if (c.meuPapel !== 'ADMIN') setErro('Somente administradores podem editar a comunidade.')
-        else setInicial({ nome: c.nome, descricao: c.descricao, visibilidade: c.visibilidade })
+        else {
+          setInicial({
+            nome: c.nome,
+            descricao: c.descricao,
+            visibilidade: c.visibilidade,
+            modalidade: c.modalidade || '',
+            publicoAlvo: c.publicoAlvo || 'todos',
+            vagasMaximas: c.vagasMaximas ?? '',
+          })
+        }
       })
       .catch((e) => setErro(e.message))
   }, [id])

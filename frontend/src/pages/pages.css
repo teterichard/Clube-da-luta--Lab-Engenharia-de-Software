@@ -400,3 +400,111 @@
 .lista-contato strong {
   color: var(--text-h);
 }
+
+/* ---- Avaliações (RF12–RF14, RF18) e mural (RF17) ---- */
+
+.media-avaliacoes {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #4b5563;
+}
+
+.form-avaliar {
+  margin-bottom: 12px;
+}
+
+.lista-avaliacoes {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.avaliacao {
+  padding: 10px 0;
+  border-bottom: 1px solid #ececf1;
+  font-size: 13px;
+}
+
+.avaliacao:last-child {
+  border-bottom: none;
+}
+
+.avaliacao p {
+  margin: 4px 0 0 0;
+}
+
+.avaliacao-topo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.avaliacao-data {
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.mural {
+  max-height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 10px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mural-msg {
+  background: #f6f7fb;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.mural-msg p {
+  margin: 2px 0 0 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.mural-topo {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.mural-topo strong {
+  color: var(--text-h);
+}
+
+.mural-form {
+  display: flex;
+  gap: 8px;
+}
+
+.mural-form input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 13px;
+  padding: 9px 12px;
+  border: 1px solid #c4c7d0;
+  border-radius: 10px;
+}
+
+.reputacao {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: #4b5563;
+  margin: 0 0 12px 0;
+}

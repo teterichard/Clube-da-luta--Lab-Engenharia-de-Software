@@ -2,8 +2,11 @@ const { criarConvite, responderConvite } = require('../domain/convite');
 const { ehOrganizador } = require('../domain/atividade');
 const { normalizarEmail } = require('../domain/usuario');
 const { StatusConvite, StatusParticipacao } = require('../domain/enums');
-const { ErroNaoEncontrado, ErroProibido, ErroValidacao } = require('../domain/erros');
+const {
+  ErroNaoEncontrado, ErroProibido, ErroValidacao, ErroRegraNegocio,
+} = require('../domain/erros');
 const { Eventos } = require('../domain/eventos');
+const { verificarFaixaEtaria } = require('../domain/faixaEtaria');
 
 const mesmoId = (a, b) => String(a) === String(b);
 
@@ -64,6 +67,12 @@ function criarConviteService({
         participacaoRepository.listarPorAtividade(atividade.id),
       ]);
       const novo = criarConvite(atividade, usuario, convidado, convites, participacoes, relogio());
+      // RF19: mesma regra de idade da inscrição, explicada para quem convida
+      try {
+        verificarFaixaEtaria(atividade.publicoAlvo, convidado);
+      } catch (e) {
+        throw new ErroRegraNegocio(`Não é possível convidar ${convidado.nome}: ${e.message.charAt(0).toLowerCase()}${e.message.slice(1)}`);
+      }
       const [salvo] = await comConvidados([await conviteRepository.salvar(novo)]);
       await eventos.publicar(Eventos.CONVITE_CRIADO, { atividade, convite: salvo });
       return salvo;
@@ -114,6 +123,7 @@ function criarConviteService({
       const encontrado = await conviteRepository.buscarPorId(conviteId);
       if (!encontrado) throw new ErroNaoEncontrado('Convite não encontrado');
       await carregarAtividade(encontrado.atividadeId);
+      const perfil = (await usuarioRepository.buscarPorId(usuario.id)) || usuario;
 
       // aceitar ocupa vaga: mesma trava por atividade usada no aceite de solicitações
       const { atividade, convite } = await comTrava(encontrado.atividadeId, async (repos) => {
@@ -123,6 +133,7 @@ function criarConviteService({
         const agora = relogio();
 
         const respondido = responderConvite(convite, atividade, participacoes, usuario, decisao, agora);
+        if (respondido.status === StatusConvite.ACEITO) verificarFaixaEtaria(atividade.publicoAlvo, perfil);
         const salvo = await repos.conviteRepository.atualizar(respondido);
         if (salvo.status === StatusConvite.ACEITO) {
           await confirmarPresenca(repos.participacaoRepository, atividade, participacoes, usuario.id, agora);

@@ -1,7 +1,9 @@
 const express = require('express');
 
 /** Todas as rotas exigem login (pré-condição do caso de uso — CT-02). */
-function atividadeRoutes({ controller, participacaoController, conviteController, autenticar }) {
+function atividadeRoutes({
+  controller, participacaoController, conviteController, avaliacaoController, autenticar,
+}) {
   const router = express.Router();
   router.use(autenticar);
 
@@ -23,6 +25,11 @@ function atividadeRoutes({ controller, participacaoController, conviteController
   // convites (RF07): { "email": "pessoa@exemplo.com" }
   router.post('/:id/convites', conviteController.convidar);
   router.get('/:id/convites', conviteController.listarDaAtividade);
+
+  // avaliações depois de concluída (RF12–RF14): { "nota": 1-5, "comentario"? }
+  router.post('/:id/avaliacoes', avaliacaoController.avaliarAtividade);
+  router.get('/:id/avaliacoes', avaliacaoController.listarDaAtividade);
+  router.post('/:id/participantes/:usuarioId/avaliacao', avaliacaoController.avaliarParticipante);
   return router;
 }
 

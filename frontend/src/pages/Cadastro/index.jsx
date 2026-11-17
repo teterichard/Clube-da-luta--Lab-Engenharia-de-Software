@@ -7,7 +7,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { NIVEIS } from '../../utils/atividade'
 
 // RF01 — cadastro de usuário. Mesmas regras do back-end (domain/usuario.js) para avisar antes de enviar.
-const VAZIO = { nome: '', email: '', senha: '', confirmacao: '', localizacao: '', proficiencia: '' }
+const VAZIO = { nome: '', email: '', senha: '', confirmacao: '', localizacao: '', idade: '', proficiencia: '' }
 
 function validar(form) {
   const erros = {}
@@ -16,6 +16,10 @@ function validar(form) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) erros.email = 'E-mail inválido'
   if (form.senha.length < 8) erros.senha = 'A senha precisa ter pelo menos 8 caracteres'
   if (form.confirmacao !== form.senha) erros.confirmacao = 'As senhas não conferem'
+  if (form.idade !== '') {
+    const idade = Number(form.idade)
+    if (!Number.isInteger(idade) || idade < 13 || idade > 120) erros.idade = 'Idade entre 13 e 120 anos'
+  }
   return erros
 }
 
@@ -51,6 +55,7 @@ function Cadastro() {
         email: form.email.trim(),
         senha: form.senha,
         localizacao: form.localizacao.trim() || undefined,
+        idade: form.idade === '' ? undefined : Number(form.idade),
         proficiencia: form.proficiencia || undefined,
       })
       navigate(destino, { replace: true })
@@ -94,6 +99,13 @@ function Cadastro() {
             <input id="localizacao" value={form.localizacao} placeholder="Ex.: Pinheiros, São Paulo"
               onChange={(e) => alterar('localizacao', e.target.value)} />
           </Campo>
+          <Campo nome="idade" label="Idade" erro={erros.idade}
+            dica="Necessária para atividades e comunidades só para adultos ou só para menores">
+            <input id="idade" type="number" min="13" max="120" inputMode="numeric" value={form.idade}
+              onChange={(e) => alterar('idade', e.target.value)} />
+          </Campo>
+        </div>
+        <div className="form-linha">
           <Campo nome="proficiencia" label="Seu nível em geral" erro={erros.proficiencia}>
             <select id="proficiencia" value={form.proficiencia} onChange={(e) => alterar('proficiencia', e.target.value)}>
               <option value="">Prefiro não dizer</option>

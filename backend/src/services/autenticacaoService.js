@@ -7,6 +7,8 @@ const {
   semSenha,
 } = require('../domain/usuario');
 const { ErroNaoAutenticado, ErroNaoEncontrado, ErroRegraNegocio } = require('../domain/erros');
+const { resumir } = require('../domain/avaliacao');
+const { TipoAvaliacao } = require('../domain/enums');
 
 const CUSTO_BCRYPT = 10;
 
@@ -16,6 +18,7 @@ const CUSTO_BCRYPT = 10;
  */
 function criarAutenticacaoService({
   usuarioRepository,
+  avaliacaoRepository,
   jwtSegredo,
   jwtExpiracao = '7d',
   relogio = () => new Date(),
@@ -45,10 +48,13 @@ function criarAutenticacaoService({
       return { token: emitirToken(usuario), usuario: semSenha(usuario) };
     },
 
+    /** Perfil + reputação como participante (média das notas dos organizadores — RF14). */
     async perfil(usuarioLogado) {
       const usuario = await usuarioRepository.buscarPorId(usuarioLogado.id);
       if (!usuario) throw new ErroNaoEncontrado('Usuário não encontrado');
-      return semSenha(usuario);
+      if (!avaliacaoRepository) return semSenha(usuario);
+      const notas = await avaliacaoRepository.listarPorAlvo(TipoAvaliacao.USUARIO, usuario.id);
+      return { ...semSenha(usuario), reputacao: resumir(notas) };
     },
 
     async atualizarPerfil(usuarioLogado, dados) {

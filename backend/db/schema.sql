@@ -82,6 +82,9 @@ CREATE TABLE IF NOT EXISTS comunidade (
   nome          VARCHAR(80)  NOT NULL,
   descricao     VARCHAR(500) NOT NULL,
   visibilidade  ENUM('PUBLICA','PRIVADA') NOT NULL DEFAULT 'PUBLICA',
+  modalidade    VARCHAR(50)  NULL,          -- RF15 (caso de uso "Criar comunidade")
+  publico_alvo  VARCHAR(50)  NULL,          -- "adultos"/"menores" restringem a idade (RF19)
+  vagas_maximas INT          NULL,          -- NULL = sem limite
   criador_id    INT NOT NULL,
   criada_em     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_comunidade_criador FOREIGN KEY (criador_id) REFERENCES usuario(id),
@@ -98,4 +101,34 @@ CREATE TABLE IF NOT EXISTS comunidade_membro (
   CONSTRAINT fk_membro_comunidade FOREIGN KEY (comunidade_id) REFERENCES comunidade(id) ON DELETE CASCADE,
   CONSTRAINT fk_membro_usuario    FOREIGN KEY (usuario_id)    REFERENCES usuario(id),
   INDEX idx_membro_usuario (usuario_id)
+);
+
+-- RF17 — mural de mensagens dos membros da comunidade
+CREATE TABLE IF NOT EXISTS comunidade_mensagem (
+  id             INT AUTO_INCREMENT PRIMARY KEY,
+  comunidade_id  INT NOT NULL,
+  autor_id       INT NOT NULL,
+  conteudo       VARCHAR(500) NOT NULL,
+  enviada_em     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_mensagem_comunidade FOREIGN KEY (comunidade_id) REFERENCES comunidade(id) ON DELETE CASCADE,
+  CONSTRAINT fk_mensagem_autor      FOREIGN KEY (autor_id)      REFERENCES usuario(id),
+  INDEX idx_mensagem_comunidade (comunidade_id, enviada_em)
+);
+
+-- RF12–RF14 e RF18 — avaliações (RNF07: o histórico fica guardado)
+-- tipo ATIVIDADE: alvo = atividade · USUARIO: alvo = participante, contexto = atividade · COMUNIDADE: alvo = comunidade
+CREATE TABLE IF NOT EXISTS avaliacao (
+  id           INT AUTO_INCREMENT PRIMARY KEY,
+  autor_id     INT NOT NULL,
+  tipo         ENUM('ATIVIDADE','USUARIO','COMUNIDADE') NOT NULL,
+  alvo_id      INT NOT NULL,
+  contexto_id  INT NOT NULL DEFAULT 0,
+  nota         TINYINT NOT NULL,
+  comentario   VARCHAR(500),
+  criada_em    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_avaliacao_autor FOREIGN KEY (autor_id) REFERENCES usuario(id),
+  CONSTRAINT ck_avaliacao_nota CHECK (nota BETWEEN 1 AND 5),
+  UNIQUE KEY uk_avaliacao (autor_id, tipo, alvo_id, contexto_id),
+  INDEX idx_avaliacao_alvo (tipo, alvo_id),
+  INDEX idx_avaliacao_contexto (tipo, contexto_id)
 );

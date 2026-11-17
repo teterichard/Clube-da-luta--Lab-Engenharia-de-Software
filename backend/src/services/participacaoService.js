@@ -6,6 +6,8 @@ const {
 } = require('../domain/participacao');
 const { ErroNaoEncontrado, ErroProibido } = require('../domain/erros');
 const { Eventos } = require('../domain/eventos');
+const { verificarFaixaEtaria } = require('../domain/faixaEtaria');
+const { TipoAvaliacao } = require('../domain/enums');
 
 /**
  * Caso de uso principal — "Inscrever-se em atividade" (passos 6 e 7, fluxos alternativos 2 e 3).
@@ -15,6 +17,7 @@ function criarParticipacaoService({
   atividadeRepository,
   participacaoRepository,
   usuarioRepository,
+  avaliacaoRepository,
   comTrava,
   eventos,
   relogio = () => new Date(),
@@ -60,20 +63,30 @@ function criarParticipacaoService({
   return {
     /** Passo 6 — participante clica em "Solicitar participação" (CT-01, CT-04, CT-06). */
     async solicitar(atividadeId, usuario) {
+      // o token só tem id e nome; a idade vem do perfil (RF19)
+      const perfil = (usuarioRepository && await usuarioRepository.buscarPorId(usuario.id)) || usuario;
       return executarEPublicar(atividadeId, Eventos.PARTICIPACAO_SOLICITADA, async (atividade, repos) => {
         const participacoes = await repos.participacaoRepository.listarPorAtividade(atividade.id);
         const nova = solicitarParticipacao(atividade, participacoes, usuario, relogio());
+        verificarFaixaEtaria(atividade.publicoAlvo, perfil);
         return repos.participacaoRepository.salvar(nova);
       });
     },
 
-    /** Organizador vê as solicitações da sua atividade. */
+    /** Organizador vê as solicitações da sua atividade (e a nota que já deu a cada participante — RF14). */
     async listarDaAtividade(atividadeId, usuario) {
       const atividade = await carregarAtividade(atividadeId);
       if (!ehOrganizador(atividade, usuario)) {
         throw new ErroProibido('Somente o organizador pode ver as solicitações');
       }
-      return comNomes(await participacaoRepository.listarPorAtividade(atividade.id));
+      const lista = await comNomes(await participacaoRepository.listarPorAtividade(atividade.id));
+      if (!avaliacaoRepository) return lista;
+      const notas = await avaliacaoRepository.listarPorContexto(TipoAvaliacao.USUARIO, atividade.id);
+      return lista.map((p) => {
+        const dada = notas.find((n) => String(n.alvoId) === String(p.usuarioId)
+          && String(n.autorId) === String(usuario.id));
+        return { ...p, notaDoOrganizador: dada ? dada.nota : null };
+      });
     },
 
     /** "Suas inscrições": participações do usuário logado com um resumo de cada atividade. */

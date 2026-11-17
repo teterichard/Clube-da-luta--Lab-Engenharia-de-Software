@@ -8,7 +8,8 @@ import Solicitacoes from './Solicitacoes'
 import Convites from './Convites'
 import AcoesOrganizador from './AcoesOrganizador'
 import MinhaParticipacao from './MinhaParticipacao'
-import { buscarAtividade } from '../../services/api'
+import Avaliacoes from '../../components/Avaliacoes'
+import { buscarAtividade, listarAvaliacoesDaAtividade, avaliarAtividade } from '../../services/api'
 import { useAuth } from '../../contexts/AuthContext'
 import { imagemDoTipo, formatarData, textoDaLista, TIPOS, NIVEIS, PUBLICOS } from '../../utils/atividade'
 import { STATUS_ATIVIDADE } from '../../utils/status'
@@ -98,6 +99,18 @@ function DetalhesAtividade() {
           <Solicitacoes atividade={atividade} onAtualizar={carregar} />
           <Convites atividade={atividade} />
         </>
+      )}
+
+      {/* RF12/RF13: depois de concluída, quem participou avalia; todos veem a média */}
+      {atividade.status === 'CONCLUIDA' && (
+        <Avaliacoes
+          key={atividade.id}
+          idSecao="avaliacoes-atividade"
+          titulo="Avaliações da atividade"
+          carregar={() => listarAvaliacoesDaAtividade(atividade.id)}
+          enviar={(nota, comentario) => avaliarAtividade(atividade.id, nota, comentario)}
+          podeAvaliar={(dados) => dados.possoAvaliar}
+        />
       )}
     </main>
   )

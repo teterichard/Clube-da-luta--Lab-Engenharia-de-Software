@@ -10,6 +10,7 @@ const { podeVerPorConvite } = require('../domain/convite');
 const { Visibilidade, StatusParticipacao } = require('../domain/enums');
 const { ErroNaoAutenticado, ErroNaoEncontrado } = require('../domain/erros');
 const { Eventos } = require('../domain/eventos');
+const { idadePermite } = require('../domain/faixaEtaria');
 
 /** Campos que, se mudarem, valem um aviso para quem vai participar. */
 const CAMPOS_AVISADOS = ['dataHora', 'local', 'titulo'];
@@ -19,6 +20,7 @@ function criarAtividadeService({
   atividadeRepository,
   participacaoRepository,
   conviteRepository,
+  usuarioRepository,
   eventos,
   relogio = () => new Date(),
 }) {
@@ -47,10 +49,16 @@ function criarAtividadeService({
       return { ...salva, vagas: salva.numeroIntegrantes };
     },
 
-    /** Inscrever-se em atividade — passos 2 a 4: listar e filtrar (CT-03, CT-07). */
-    async listar(query) {
+    /**
+     * Inscrever-se em atividade — passos 2 a 4: listar e filtrar (CT-03, CT-07).
+     * RF19: atividades cujo público não combina com a idade do usuário não aparecem.
+     */
+    async listar(query, usuario) {
       const filtros = lerFiltros(query);
-      const abertas = await atividadeRepository.listarAbertas(relogio());
+      const perfil = usuario && usuarioRepository ? await usuarioRepository.buscarPorId(usuario.id) : null;
+      const idade = perfil ? perfil.idade : null;
+      const abertas = (await atividadeRepository.listarAbertas(relogio()))
+        .filter((a) => ehOrganizador(a, usuario) || idadePermite(a.publicoAlvo, idade));
       const aceitas = await participacaoRepository.contarAceitas(abertas.map((a) => a.id));
       const comVagas = abertas.map((a) => ({
         ...a,
@@ -105,8 +113,9 @@ function criarAtividadeService({
       const atual = await carregar(id);
       const alterada = mudarStatus(atual, usuario, acao, relogio());
       const salva = await atividadeRepository.atualizar(alterada);
-      if (acao === 'cancelar') {
-        await eventos.publicar(Eventos.ATIVIDADE_CANCELADA, {
+      if (acao === 'cancelar' || acao === 'concluir') {
+        // cancelada: avisa quem ia participar · concluída: convida os confirmados a avaliar (RF12)
+        await eventos.publicar(acao === 'cancelar' ? Eventos.ATIVIDADE_CANCELADA : Eventos.ATIVIDADE_CONCLUIDA, {
           atividade: salva,
           participacoes: await participacaoRepository.listarPorAtividade(salva.id),
         });

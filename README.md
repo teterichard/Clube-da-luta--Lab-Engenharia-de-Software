@@ -9,9 +9,9 @@ interesses parecidos e dando visibilidade a organizadores (contexto completo na 
 |---|---|
 | [`backend/`](backend/) | API REST em **Node.js + Express**, MySQL e JWT (stack oficial do projeto) |
 | [`frontend/`](frontend/) | Aplicação web em **React + Vite** |
-| [`docs/`](docs/) | Planos de ação de cada caso de uso |
+| [`docs/`](docs/) | Planos de ação de cada caso de uso e o [guia de deploy](docs/deploy.md) |
 | `src/` e `pom.xml` | Protótipo do domínio em **Java** (JUnit 5), mantido só como referência das regras de negócio |
-| `.github/workflows/` | Esteiras de CI (back-end Node e protótipo Java) |
+| `.github/workflows/` | Esteiras de CI (back-end Node, build do front-end e protótipo Java) |
 
 ## Como rodar
 

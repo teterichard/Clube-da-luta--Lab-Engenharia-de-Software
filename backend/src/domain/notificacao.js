@@ -1,5 +1,5 @@
 const { Eventos } = require('./eventos');
-const { StatusParticipacao, StatusConvite } = require('./enums');
+const { StatusParticipacao, StatusConvite, TipoAvaliacao } = require('./enums');
 const { ErroNaoEncontrado } = require('./erros');
 
 /**
@@ -21,7 +21,11 @@ const TipoNotificacao = Object.freeze({
   PEDIDO_COMUNIDADE: 'PEDIDO_COMUNIDADE',
   PEDIDO_COMUNIDADE_ACEITO: 'PEDIDO_COMUNIDADE_ACEITO',
   PEDIDO_COMUNIDADE_RECUSADO: 'PEDIDO_COMUNIDADE_RECUSADO',
+  AVALIE_ATIVIDADE: 'AVALIE_ATIVIDADE',
+  AVALIACAO_RECEBIDA: 'AVALIACAO_RECEBIDA',
 });
+
+const estrelas = (n) => `${n} estrela${n === 1 ? '' : 's'}`;
 
 const ativa = (p) => p.status === StatusParticipacao.PENDENTE || p.status === StatusParticipacao.ACEITO;
 const NOMES_CAMPOS = { dataHora: 'data/horário', local: 'local', titulo: 'título' };
@@ -83,6 +87,26 @@ const TRADUTORES = {
     .map((p) => aviso(p.usuarioId, TipoNotificacao.ATIVIDADE_CANCELADA, atividade,
       `"${atividade.titulo}" foi cancelada pelo organizador`)),
 
+  // RF12: quem participou é convidado a avaliar assim que a atividade é concluída
+  [Eventos.ATIVIDADE_CONCLUIDA]: ({ atividade, participacoes }) => participacoes
+    .filter((p) => p.status === StatusParticipacao.ACEITO)
+    .map((p) => aviso(p.usuarioId, TipoNotificacao.AVALIE_ATIVIDADE, atividade,
+      `"${atividade.titulo}" foi concluída. Conte como foi: avalie a atividade`)),
+
+  [Eventos.AVALIACAO_CRIADA]: ({ avaliacao, atividade, comunidade }, nome) => {
+    const autor = nome(avaliacao.autorId);
+    if (avaliacao.tipo === TipoAvaliacao.USUARIO) {
+      return [aviso(avaliacao.alvoId, TipoNotificacao.AVALIACAO_RECEBIDA, atividade,
+        `${autor} avaliou sua participação em "${atividade.titulo}" com ${estrelas(avaliacao.nota)}`)];
+    }
+    if (avaliacao.tipo === TipoAvaliacao.ATIVIDADE) {
+      return [aviso(atividade.organizadorId, TipoNotificacao.AVALIACAO_RECEBIDA, atividade,
+        `${autor} avaliou "${atividade.titulo}" com ${estrelas(avaliacao.nota)}`)];
+    }
+    return [avisoComunidade(comunidade.criadorId, TipoNotificacao.AVALIACAO_RECEBIDA, comunidade,
+      `${autor} avaliou a comunidade "${comunidade.nome}" com ${estrelas(avaliacao.nota)}`)];
+  },
+
   [Eventos.COMUNIDADE_PEDIDO_ENTRADA]: ({ comunidade, membro, adminIds }, nome) => adminIds
     .map((id) => avisoComunidade(id, TipoNotificacao.PEDIDO_COMUNIDADE, comunidade,
       `${nome(membro.usuarioId)} pediu para entrar em "${comunidade.nome}"`)),
@@ -104,6 +128,7 @@ function usuariosDoEvento(dados) {
     dados.participacao?.usuarioId,
     dados.convite?.convidadoId,
     dados.membro?.usuarioId,
+    dados.avaliacao?.autorId,
   ];
   return ids.filter((id) => id != null);
 }

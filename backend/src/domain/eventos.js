@@ -13,6 +13,8 @@ const Eventos = Object.freeze({
   CONVITE_RESPONDIDO: 'convite.respondido',
   ATIVIDADE_EDITADA: 'atividade.editada',
   ATIVIDADE_CANCELADA: 'atividade.cancelada',
+  ATIVIDADE_CONCLUIDA: 'atividade.concluida',
+  AVALIACAO_CRIADA: 'avaliacao.criada',
   COMUNIDADE_PEDIDO_ENTRADA: 'comunidade.pedidoEntrada',
   COMUNIDADE_PEDIDO_RESPONDIDO: 'comunidade.pedidoRespondido',
 });

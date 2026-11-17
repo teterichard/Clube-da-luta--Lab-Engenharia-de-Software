@@ -42,7 +42,22 @@ const StatusMembro = Object.freeze({
   PENDENTE: 'PENDENTE', // pediu para entrar numa comunidade privada
 });
 
+/** Diagrama de classes — TipoAvaliacaoEnum (RF12–RF14 e RF18). */
+const TipoAvaliacao = Object.freeze({
+  ATIVIDADE: 'ATIVIDADE', // participante avalia a atividade concluída
+  USUARIO: 'USUARIO', // organizador avalia um participante (contexto = a atividade)
+  COMUNIDADE: 'COMUNIDADE', // membro avalia a comunidade depois de 3 meses
+});
+
+/** Público-alvo com restrição de idade (RF19 / RNF08). Outros valores ("todos"...) não restringem. */
+const PublicoAlvo = Object.freeze({
+  ADULTOS: 'adultos',
+  MENORES: 'menores',
+});
+
 module.exports = {
+  TipoAvaliacao,
+  PublicoAlvo,
   StatusAtividade,
   Visibilidade,
   Nivel,

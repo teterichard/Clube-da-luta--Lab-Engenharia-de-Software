@@ -25,39 +25,51 @@ Todas exigem `Authorization: Bearer <jwt>` (o token vem do cadastro ou do login)
 
 | Método | Rota | O que faz |
 |---|---|---|
-| `GET` | `/api/usuarios/me` | Perfil do usuário logado |
+| `GET` | `/api/usuarios/me` | Perfil do usuário logado + `reputacao` `{ media, total }` (notas dos organizadores) |
 | `PATCH` | `/api/usuarios/me` | Edita `nome`, `localizacao`, `idade`, `proficiencia` |
 | `POST` | `/api/atividades` | Cria atividade (organizador = usuário do token) |
-| `GET` | `/api/atividades` | Lista atividades públicas e agendadas, com `vagas`. Filtros: `tipo`, `nivel`, `publicoAlvo`, `local` (parcial), `data` (AAAA-MM-DD), `comVaga=true` |
+| `GET` | `/api/atividades` | Lista atividades públicas e agendadas, com `vagas`. Filtros: `tipo`, `nivel`, `publicoAlvo`, `local` (parcial), `data` (AAAA-MM-DD), `comVaga=true`. Esconde as que a idade do usuário não permite (RF19) |
 | `GET` | `/api/atividades/organizadas` | Atividades que eu organizo (todas), com `vagas` e `pendentes` |
 | `GET` | `/api/atividades/:id` | Detalhes da atividade + vagas restantes |
 | `PATCH` | `/api/atividades/:id` | Organizador edita (só `AGENDADA`; não reduz abaixo dos aceitos) |
 | `DELETE` | `/api/atividades/:id` | Organizador exclui (só se ninguém foi aceito — senão, cancele) |
 | `POST` | `/api/atividades/:id/iniciar` | `AGENDADA` → `ATIVA` |
 | `POST` | `/api/atividades/:id/cancelar` | `AGENDADA`/`ATIVA` → `CANCELADA` |
-| `POST` | `/api/atividades/:id/concluir` | `ATIVA` → `CONCLUIDA` |
+| `POST` | `/api/atividades/:id/concluir` | `ATIVA` → `CONCLUIDA` (avisa os confirmados para avaliar) |
 | `POST` | `/api/atividades/:id/participacoes` | Solicita participação (status `PENDENTE`) |
-| `GET` | `/api/atividades/:id/participacoes` | Organizador vê as solicitações da atividade |
+| `GET` | `/api/atividades/:id/participacoes` | Organizador vê as solicitações da atividade (com `notaDoOrganizador` depois de avaliar) |
+| `POST` | `/api/atividades/:id/avaliacoes` | Participante confirmado avalia a atividade concluída: `{ "nota": 1-5, "comentario"? }` (RF12/RF13) |
+| `GET` | `/api/atividades/:id/avaliacoes` | `{ media, total, avaliacoes, minhaAvaliacao, possoAvaliar }` |
+| `POST` | `/api/atividades/:id/participantes/:usuarioId/avaliacao` | Organizador avalia um participante confirmado: `{ "nota" }` (RF14) |
 | `POST` | `/api/atividades/:id/convites` | Organizador convida pelo e-mail: `{ "email": "ana@exemplo.com" }` |
 | `GET` | `/api/atividades/:id/convites` | Organizador vê os convites e respostas |
 | `GET` | `/api/convites` | Convites recebidos pelo usuário logado (`?status=PENDENTE`) |
 | `PATCH` | `/api/convites/:id` | Convidado responde `{ "decisao": "ACEITAR" }` ou `RECUSAR`; aceitar confirma a presença |
 | `PATCH` | `/api/participacoes/:id` | Organizador responde: `{ "decisao": "ACEITAR" }` ou `{ "decisao": "RECUSAR" }` |
-| `POST` | `/api/comunidades` | Cria comunidade `{ nome, descricao, visibilidade }`; quem cria vira admin |
-| `GET` | `/api/comunidades` | Todas as comunidades (`?busca=`), com `totalMembros`, `meuStatus`, `meuPapel` |
+| `POST` | `/api/comunidades` | Cria comunidade `{ nome, descricao, visibilidade, modalidade?, publicoAlvo?, vagasMaximas? }`; quem cria vira admin |
+| `GET` | `/api/comunidades` | Todas as comunidades, com `totalMembros`, `vagas` (`null` = sem limite), `meuStatus`, `meuPapel`. Filtros: `busca`, `modalidade`, `publicoAlvo`, `comVaga=true` |
 | `GET` | `/api/comunidades/minhas` | Comunidades de que faço parte (inclui pedidos pendentes) |
 | `GET` / `PATCH` | `/api/comunidades/:id` | Detalhes / admin edita |
 | `GET` | `/api/comunidades/:id/membros` | Membros (privada: só para membros; pendentes: só para admins) |
 | `POST` | `/api/comunidades/:id/membros` | Entrar (pública: na hora; privada: pedido pendente) |
 | `DELETE` | `/api/comunidades/:id/membros/me` | Sair (o último admin não pode sair) |
 | `PATCH` | `/api/comunidades/:id/membros/:usuarioId` | Admin: `{ "decisao": "ACEITAR" \| "RECUSAR" }` ou `{ "papel": "ADMIN" }` |
+| `GET` / `POST` | `/api/comunidades/:id/mensagens` | Mural (RF17), só membros ativos: `{ "conteudo" }` |
+| `POST` | `/api/comunidades/:id/avaliacoes` | Membro avalia a comunidade depois de 3 meses dentro dela (RF18) |
+| `GET` | `/api/comunidades/:id/avaliacoes` | `{ media, total, avaliacoes, minhaAvaliacao, possoAvaliarEm }` |
 | `GET` | `/api/notificacoes` | Minhas notificações `{ naoLidas, itens }` (`?naoLidas=true` filtra) |
 | `PATCH` | `/api/notificacoes/:id/lida` | Marca uma como lida |
 | `POST` | `/api/notificacoes/lidas` | Marca todas como lidas |
 | `GET` | `/api/participacoes/minhas` | Minhas inscrições, com resumo de cada atividade |
 | `POST` | `/api/participacoes/:id/cancelar` | Participante desiste (pendente ou aceita; devolve a vaga) |
 
-Erros: `400` dados inválidos · `401` sem login · `403` sem permissão · `404` não encontrado · `409` regra de negócio (sem vagas, duplicidade, já respondida).
+Erros: `400` dados inválidos · `401` sem login · `403` sem permissão (inclui faixa etária) · `404` não encontrado · `409` regra de negócio (sem vagas, duplicidade, já respondida, idade não informada).
+
+**Faixa etária (RF19/RNF08):** atividade ou comunidade com `publicoAlvo` `adultos` só aceita 18+ e `menores` só aceita menores de 18.
+A idade vem do perfil; sem ela, a pessoa precisa informar antes de entrar onde há restrição.
+
+**Deploy:** a API aceita `DATABASE_URL`/`MYSQL_URL`, cria as tabelas ao subir e libera o front pelo `CORS_ORIGIN`.
+Passo a passo em [`docs/deploy.md`](../docs/deploy.md). Criar as tabelas sem subir a API: `npm run db:init`.
 
 ## Rodando
 

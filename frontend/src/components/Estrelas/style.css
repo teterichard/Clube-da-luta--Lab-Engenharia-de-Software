@@ -1,0 +1,32 @@
+.estrelas {
+  display: inline-flex;
+  gap: 2px;
+  line-height: 1;
+}
+
+.estrela {
+  color: #9ca3af;
+  font-size: 16px;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.estrelas_grande .estrela {
+  font-size: 26px;
+}
+
+button.estrela {
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+button.estrela:focus-visible {
+  outline: 2px solid #4338ca;
+  outline-offset: 2px;
+}
+
+/* âmbar escuro: contraste mínimo com o fundo branco (WCAG AA para componentes) */
+.estrela_cheia {
+  color: #b45309;
+}
