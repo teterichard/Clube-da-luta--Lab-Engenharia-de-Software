@@ -1,7 +1,7 @@
 .menu-fundo {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(15, 42, 35, 0.45);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
@@ -18,59 +18,58 @@
   top: 0;
   left: 0;
   height: 100%;
-  width: 240px;
-  background: #ffffff;
-  box-shadow: var(--shadow);
-  padding: 20px 14px;
+  width: 280px;
+  background: var(--paper);
+  padding: 18px 14px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   transform: translateX(-100%);
   transition: transform 0.25s ease;
   z-index: 11;
   text-align: start;
+  border-radius: 0 24px 24px 0;
 }
 
 .menu-lateral_aberto {
   transform: translateX(0);
+  box-shadow: 12px 0 40px -12px rgba(15, 42, 35, 0.35);
 }
 
 .menu-topo {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 14px;
-}
-
-.menu-titulo {
-  font-weight: 700;
-  color: var(--text-h);
+  margin: 0 4px 18px;
 }
 
 .menu-fechar {
-  background: none;
+  background: var(--sage);
   border: none;
-  font-size: 26px;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  font-size: 24px;
   line-height: 1;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--ink);
 }
 
 .menu-link {
-  padding: 10px 12px;
-  border-radius: 10px;
-  color: #374151;
+  padding: 12px 14px;
+  border-radius: 14px;
+  color: var(--ink);
   text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .menu-link:hover {
-  background: #f1f2f6;
+  background: var(--sage);
 }
 
 .menu-link_ativo {
-  background: rgba(99, 102, 241, 0.12);
-  color: #4f46e5;
+  background: var(--crest);
+  color: var(--forest-escuro);
 }

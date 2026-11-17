@@ -6,6 +6,8 @@ import Card from '../../components/Card'
 import Carousel from '../../components/Carousel'
 import Aviso from '../../components/Aviso'
 import Tag from '../../components/Tag'
+import Arco from '../../components/Arco'
+import { useAuth } from '../../contexts/AuthContext'
 import {
   listarAtividades,
   listarAtividadesOrganizadas,
@@ -21,6 +23,8 @@ const EM_ANDAMENTO = ['AGENDADA', 'ATIVA']
 function Home() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { usuario } = useAuth()
+  const primeiroNome = usuario?.nome?.trim().split(/\s+/)[0]
   const [dados, setDados] = useState(null)
   const [erro, setErro] = useState('')
 
@@ -49,17 +53,18 @@ function Home() {
 
   return (
     <main id="conteudo" className="contentBox">
-      <h1 className="sr-only">Início</h1>
       <Aviso tipo="sucesso">{location.state?.mensagem}</Aviso>
 
-      <section className="subcontentBox">
-        <Link to="/atividades/nova" className="home-criar">
-          <span>
-            <strong>Organize uma atividade</strong>
-            <small>Chame a galera para jogar, correr ou dançar</small>
-          </span>
+      <section className="home-hero" aria-labelledby="home-ola">
+        <h1 id="home-ola" className="home-ola">
+          {primeiroNome ? `E aí, ${primeiroNome}.` : 'E aí.'} <span>Topa o quê hoje?</span>
+        </h1>
+        <p className="home-hero-texto">Chame a galera para jogar, correr ou dançar. Você define o lugar, o horário e quantas pessoas cabem.</p>
+        <Link to="/atividades/nova" className="btn home-criar">
           <span className="home-criar-mais" aria-hidden="true">+</span>
+          Organizar atividade
         </Link>
+        <Arco className="home-hero-arco" />
       </section>
 
       <Aviso tipo="erro">{erro}</Aviso>

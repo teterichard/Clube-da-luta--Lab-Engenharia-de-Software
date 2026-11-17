@@ -1,0 +1,36 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--ink);
+}
+
+.logo_claro {
+  color: #ffffff;
+}
+
+.logo-marca {
+  flex-shrink: 0;
+  display: block;
+}
+
+.logo_claro .logo-marca rect {
+  /* no cabeçalho verde, o quadrado da marca fica um tom mais claro para não sumir no fundo */
+  fill: var(--forest-2);
+}
+
+.logo-texto {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 23px;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.logo-hifen {
+  color: var(--mandarin);
+}
+
+.logo-marca_claro rect {
+  fill: var(--forest-2);
+}

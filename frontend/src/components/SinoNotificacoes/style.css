@@ -4,17 +4,18 @@
 
 .sino-contador {
   position: absolute;
-  top: -2px;
-  right: -4px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
+  top: -5px;
+  right: -5px;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
   box-sizing: border-box;
   border-radius: 999px;
-  background: #c53030;
-  color: #ffffff;
+  background: var(--mandarin);
+  color: var(--ink);
+  border: 2px solid var(--forest);
   font-size: 10px;
-  font-weight: 700;
-  line-height: 16px;
+  font-weight: 800;
+  line-height: 15px;
   text-align: center;
 }

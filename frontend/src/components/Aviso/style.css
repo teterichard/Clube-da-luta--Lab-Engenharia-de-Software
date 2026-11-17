@@ -1,9 +1,11 @@
 .aviso {
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 13px;
+  border-radius: var(--raio-p);
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
   text-align: start;
-  margin: 10px 0;
+  margin: 12px 0;
+  border-left: 5px solid currentColor;
 }
 
 .aviso ul {
@@ -12,16 +14,16 @@
 }
 
 .aviso_erro {
-  background: #fdecec;
-  color: #b42318;
+  background: var(--erro-fundo);
+  color: var(--erro);
 }
 
 .aviso_sucesso {
-  background: #e7f6ec;
-  color: #1e7b3c;
+  background: var(--ok-fundo);
+  color: var(--forest-escuro);
 }
 
 .aviso_info {
-  background: rgba(99, 102, 241, 0.1);
-  color: #4338ca;
+  background: var(--crest-suave);
+  color: var(--forest-escuro);
 }

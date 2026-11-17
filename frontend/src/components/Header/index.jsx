@@ -5,6 +5,7 @@ import './style.css'
 import SearchBar from '../SearchBar'
 import SideMenu from '../SideMenu'
 import SinoNotificacoes from '../SinoNotificacoes'
+import Logo from '../Logo'
 import { useAuth } from '../../contexts/AuthContext'
 
 // Cabeçalho usado em todas as telas: menu, nome do app, perfil e barra de busca
@@ -20,7 +21,7 @@ function Header({ mostrarBusca = true }) {
   }
 
   return (
-    <header>
+    <header className="topo">
       <a href="#conteudo" className="pular-conteudo">Pular para o conteúdo</a>
       <div className="firstBox">
         <button className="icon-btn" onClick={() => setMenuAberto(true)} aria-label="Abrir menu"
@@ -33,7 +34,7 @@ function Header({ mostrarBusca = true }) {
           </svg>
         </button>
 
-        <Link to="/" className="firstName">Topa-aí</Link>
+        <Link to="/" className="firstName" aria-label="Topa-aí, página inicial"><Logo claro /></Link>
 
         <div className="topo-acoes">
           {usuario && <SinoNotificacoes />}

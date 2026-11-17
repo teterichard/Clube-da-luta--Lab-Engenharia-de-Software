@@ -9,18 +9,18 @@
 .filtros input[type='date'],
 .filtro-local {
   font: inherit;
-  font-size: 12px;
+  font-size: 14px;
   padding: 8px 10px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--raio-p);
   background: #ffffff;
-  color: #1f2937;
+  color: var(--ink);
   outline: none;
 }
 
 .filtros select:focus,
 .filtros input:focus {
-  border-color: #6366f1;
+  border-color: var(--forest);
 }
 
 .filtro-local {
@@ -32,18 +32,18 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  color: #374151;
+  font-size: 14px;
+  color: var(--ink);
   cursor: pointer;
 }
 
 .filtro-check input {
-  accent-color: #6366f1;
+  accent-color: var(--forest);
 }
 
 .resultado-qtd {
-  font-size: 12px;
-  color: #4b5563;
+  font-size: 14px;
+  color: var(--muted);
   margin-bottom: 4px;
 }
 
