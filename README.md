@@ -51,13 +51,19 @@ mvn test                      # protótipo Java
 - A esteira de CI precisa estar verde antes do merge.
 
 ## Projeto Extensionista
-O Topa Aí foi desenvolvido com o propósito de atender aos critérios de uma aplicação extensionista, buscando gerar um impacto positivo na sociedade por meio da tecnologia. A plataforma funciona como uma ferramenta de aproximação entre pessoas que, mesmo sem se conhecerem previamente, compartilham interesses e desejam participar de atividades coletivas. Dessa forma, incentiva a socialização, a formação de comunidades, a prática de esportes e a construção de novas relações interpessoais.
+## Impacto Social e Caráter Extensionista
 
+O **Topa Aí** foi desenvolvido com o propósito de gerar um impacto positivo na sociedade por meio da tecnologia, atendendo aos princípios de uma aplicação extensionista. A plataforma funciona como uma ferramenta de aproximação entre pessoas que, mesmo sem se conhecerem previamente, compartilham interesses e desejam participar de atividades coletivas. Dessa forma, incentiva a socialização, a formação de comunidades, a prática de esportes e a construção de novas relações interpessoais.
 Em uma sociedade cada vez mais conectada digitalmente, mas que nem sempre oferece oportunidades suficientes de interação presencial, o Topa Aí propõe uma utilização diferente da tecnologia. Em vez de estimular exclusivamente o consumo de conteúdo e as interações virtuais, a plataforma utiliza o ambiente digital como um meio para viabilizar experiências fora das telas. A proposta é transformar conexões iniciadas no ambiente virtual em encontros reais, aproximando pessoas e facilitando a participação em atividades que talvez não acontecessem espontaneamente.
 
-Essa iniciativa também se relaciona diretamente à importância das relações sociais para a saúde e o desenvolvimento humano. O isolamento social e a ausência de vínculos interpessoais podem afetar negativamente a saúde mental, contribuindo para sentimentos de solidão, ansiedade e depressão. Além disso, a falta de interação e de atividades coletivas pode comprometer hábitos importantes para a saúde física, como a prática regular de exercícios. O convívio social também favorece o estímulo cognitivo, uma vez que as relações interpessoais envolvem comunicação, aprendizado, troca de experiências e desenvolvimento de habilidades intelectuais.
+### A importância das conexões humanas
 
-Nesse contexto, a missão do Topa Aí é utilizar a tecnologia para aproximar pessoas, reduzir barreiras à socialização e incentivar experiências compartilhadas. Mais do que organizar atividades, a plataforma busca criar oportunidades para que indivíduos encontrem companhia para fazer aquilo de que gostam, descubram novos interesses e construam vínculos. Afinal, a tecnologia deve ser também uma ferramenta para aproximar pessoas no mundo real, e não apenas conectá-las virtualmente.
+A iniciativa também se relaciona diretamente à importância das relações sociais para a saúde e o desenvolvimento humano. O isolamento social e a ausência de vínculos interpessoais podem afetar negativamente a saúde mental, contribuindo para sentimentos de solidão, ansiedade e depressão. Além disso, a falta de interação e de atividades coletivas pode comprometer hábitos importantes para a saúde física, como a prática regular de exercícios.
+O convívio social também favorece o desenvolvimento cognitivo, uma vez que as relações interpessoais envolvem comunicação, aprendizado, troca de experiências e estímulo às habilidades intelectuais. Assim, criar oportunidades para novas interações representa também uma forma de incentivar o bem-estar e a qualidade de vida.
 
+### Nossa missão
 
+A missão do **Topa Aí** é utilizar a tecnologia para aproximar pessoas, reduzir barreiras à socialização e incentivar experiências compartilhadas. Mais do que organizar atividades, a plataforma busca criar oportunidades para que indivíduos encontrem companhia para fazer aquilo de que gostam, descubram novos interesses e construam vínculos.
+Acreditamos que a tecnologia deve ser também uma ferramenta para aproximar pessoas no mundo real, e não apenas conectá-las virtualmente.
 
+**O Topa Aí não existe para conectar pessoas às telas, mas para conectar pessoas por meio das telas.**
