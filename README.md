@@ -49,3 +49,15 @@ mvn test                      # protótipo Java
 - Mensagens de commit no padrão [Conventional Commits](https://www.conventionalcommits.org/pt-br/), em português:
   `feat(api): ...`, `fix(front): ...`, `docs: ...`, `test: ...`, `chore: ...`, `ci: ...`.
 - A esteira de CI precisa estar verde antes do merge.
+
+## Projeto Extensionista
+O Topa Aí foi desenvolvido com o propósito de atender aos critérios de uma aplicação extensionista, buscando gerar um impacto positivo na sociedade por meio da tecnologia. A plataforma funciona como uma ferramenta de aproximação entre pessoas que, mesmo sem se conhecerem previamente, compartilham interesses e desejam participar de atividades coletivas. Dessa forma, incentiva a socialização, a formação de comunidades, a prática de esportes e a construção de novas relações interpessoais.
+
+Em uma sociedade cada vez mais conectada digitalmente, mas que nem sempre oferece oportunidades suficientes de interação presencial, o Topa Aí propõe uma utilização diferente da tecnologia. Em vez de estimular exclusivamente o consumo de conteúdo e as interações virtuais, a plataforma utiliza o ambiente digital como um meio para viabilizar experiências fora das telas. A proposta é transformar conexões iniciadas no ambiente virtual em encontros reais, aproximando pessoas e facilitando a participação em atividades que talvez não acontecessem espontaneamente.
+
+Essa iniciativa também se relaciona diretamente à importância das relações sociais para a saúde e o desenvolvimento humano. O isolamento social e a ausência de vínculos interpessoais podem afetar negativamente a saúde mental, contribuindo para sentimentos de solidão, ansiedade e depressão. Além disso, a falta de interação e de atividades coletivas pode comprometer hábitos importantes para a saúde física, como a prática regular de exercícios. O convívio social também favorece o estímulo cognitivo, uma vez que as relações interpessoais envolvem comunicação, aprendizado, troca de experiências e desenvolvimento de habilidades intelectuais.
+
+Nesse contexto, a missão do Topa Aí é utilizar a tecnologia para aproximar pessoas, reduzir barreiras à socialização e incentivar experiências compartilhadas. Mais do que organizar atividades, a plataforma busca criar oportunidades para que indivíduos encontrem companhia para fazer aquilo de que gostam, descubram novos interesses e construam vínculos. Afinal, a tecnologia deve ser também uma ferramenta para aproximar pessoas no mundo real, e não apenas conectá-las virtualmente.
+
+
+
