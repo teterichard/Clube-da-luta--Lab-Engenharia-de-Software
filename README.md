@@ -50,7 +50,6 @@ mvn test                      # protótipo Java
   `feat(api): ...`, `fix(front): ...`, `docs: ...`, `test: ...`, `chore: ...`, `ci: ...`.
 - A esteira de CI precisa estar verde antes do merge.
 
-## Projeto Extensionista
 ## Impacto Social e Caráter Extensionista
 
 O **Topa Aí** foi desenvolvido com o propósito de gerar um impacto positivo na sociedade por meio da tecnologia, atendendo aos princípios de uma aplicação extensionista. A plataforma funciona como uma ferramenta de aproximação entre pessoas que, mesmo sem se conhecerem previamente, compartilham interesses e desejam participar de atividades coletivas. Dessa forma, incentiva a socialização, a formação de comunidades, a prática de esportes e a construção de novas relações interpessoais.
